@@ -71,6 +71,7 @@ export const defaultMetadata: Metadata = {
 		},
 	},
 	verification: {
+		google: "PJPbuCHJfoyojLi6kG_ERB8U0mQxpMAM8gVfr4GZPIY",
 		// Add your verification codes here when available
 		// google: "your-google-verification-code",
 		// yandex: "your-yandex-verification-code",
