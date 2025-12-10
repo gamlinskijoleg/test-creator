@@ -27,24 +27,10 @@ const signInSchema = z.object({
 	password: z.string().min(1, "Password is required"),
 })
 
-const signUpSchema = signInSchema
-	.extend({
-		name: z.string().min(1, "Name is required"),
-		confirmPassword: z.string().min(1, "Please confirm your password"),
-	})
-	.refine(
-		data => {
-			// Only check if both passwords are filled
-			if (!data.password || !data.confirmPassword) {
-				return true
-			}
-			return data.password === data.confirmPassword
-		},
-		{
-			message: "Passwords do not match",
-			path: ["confirmPassword"],
-		},
-	)
+const signUpSchema = signInSchema.extend({
+	name: z.string().min(1, "Name is required"),
+	confirmPassword: z.string().min(1, "Please confirm your password"),
+})
 
 type SignInFormData = z.infer<typeof signInSchema>
 type SignUpFormData = z.infer<typeof signUpSchema>
@@ -62,6 +48,9 @@ export default function AuthPage() {
 	const {
 		register,
 		handleSubmit,
+		watch,
+		trigger,
+		getValues,
 		formState: { errors, isSubmitting, touchedFields },
 		reset,
 		clearErrors,
@@ -76,6 +65,17 @@ export default function AuthPage() {
 		reValidateMode: "onChange",
 		criteriaMode: "all",
 	})
+
+	// Watch password fields to trigger validation when they change
+	const password = watch("password")
+	const confirmPassword = watch("confirmPassword")
+
+	// Trigger validation when passwords change
+	useEffect(() => {
+		if (isSignUp && (password || confirmPassword)) {
+			trigger("confirmPassword")
+		}
+	}, [password, confirmPassword, isSignUp, trigger])
 
 	useEffect(() => {
 		clearErrors()
@@ -184,7 +184,13 @@ export default function AuthPage() {
 
 							<PasswordInput
 								label="Password"
-								{...register("password")}
+								{...register("password", {
+									onChange: () => {
+										if (isSignUp) {
+											trigger("confirmPassword")
+										}
+									},
+								})}
 								error={touchedFields.password ? errors.password?.message : undefined}
 								required
 							/>
@@ -192,10 +198,19 @@ export default function AuthPage() {
 							{isSignUp && (
 								<PasswordInput
 									label="Confirm Password"
-									{...register("confirmPassword")}
+									{...register("confirmPassword", {
+										validate: value => {
+											if (!value) return "Please confirm your password"
+											const currentPassword = getValues("password")
+											if (currentPassword && value !== currentPassword) {
+												return "Passwords do not match"
+											}
+											return true
+										},
+									})}
 									error={
-										(touchedFields as Record<string, boolean>).confirmPassword
-											? (errors as Record<string, { message?: string }>).confirmPassword?.message
+										(touchedFields as Record<string, boolean>).confirmPassword || confirmPassword
+											? (errors as Record<string, { message: string }>).confirmPassword?.message
 											: undefined
 									}
 									required
