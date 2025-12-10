@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getSession } from "@/lib/actions/auth"
-import { Container, Title, Text, Button, Group, Card, Stack, Grid, GridCol, Badge, Box } from "@mantine/core"
+import { Container, Title, Text, Button, Group, Card, Stack, Grid, GridCol, Box } from "@mantine/core"
 import { IconFileText, IconChecklist, IconUsers, IconDashboard, IconPlus, IconLogin } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
 

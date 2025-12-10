@@ -827,6 +827,648 @@ const testTemplates = [
 			},
 		],
 	},
+	{
+		title: "JavaScript Variables",
+		description: "Understanding JavaScript variable declarations",
+		questions: [
+			{
+				question_text: "What is the difference between 'const' and 'let'?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "'const' cannot be reassigned, 'let' can", is_correct: true },
+					{ answer_text: "No difference", is_correct: false },
+					{ answer_text: "'let' is for constants", is_correct: false },
+					{ answer_text: "'const' is deprecated", is_correct: false },
+				],
+			},
+			{
+				question_text: "Which keyword creates a block-scoped variable?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "let or const", is_correct: true },
+					{ answer_text: "var", is_correct: false },
+					{ answer_text: "variable", is_correct: false },
+					{ answer_text: "def", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Array Methods",
+		description: "JavaScript array manipulation",
+		questions: [
+			{
+				question_text: "Which method removes the last element from an array?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "pop()", is_correct: true },
+					{ answer_text: "push()", is_correct: false },
+					{ answer_text: "shift()", is_correct: false },
+					{ answer_text: "unshift()", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "React Components",
+		description: "React component basics",
+		questions: [
+			{
+				question_text: "What is a React component?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "A reusable piece of UI", is_correct: true },
+					{ answer_text: "A database table", is_correct: false },
+					{ answer_text: "A CSS class", is_correct: false },
+					{ answer_text: "A JavaScript library", is_correct: false },
+				],
+			},
+			{
+				question_text: "What is the default export for a React component?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "A function or class", is_correct: true },
+					{ answer_text: "A string", is_correct: false },
+					{ answer_text: "A number", is_correct: false },
+					{ answer_text: "An object", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Python Lists",
+		description: "Python list operations",
+		questions: [
+			{
+				question_text: "How do you add an item to a Python list?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "list.append(item)", is_correct: true },
+					{ answer_text: "list.add(item)", is_correct: false },
+					{ answer_text: "list.insert(item)", is_correct: false },
+					{ answer_text: "list.push(item)", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "SQL Basics",
+		description: "Basic SQL commands",
+		questions: [
+			{
+				question_text: "Which SQL command updates data?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "UPDATE", is_correct: true },
+					{ answer_text: "CHANGE", is_correct: false },
+					{ answer_text: "MODIFY", is_correct: false },
+					{ answer_text: "ALTER", is_correct: false },
+				],
+			},
+			{
+				question_text: "Which SQL command deletes data?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "DELETE", is_correct: true },
+					{ answer_text: "REMOVE", is_correct: false },
+					{ answer_text: "DROP", is_correct: false },
+					{ answer_text: "CLEAR", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Git Branches",
+		description: "Working with Git branches",
+		questions: [
+			{
+				question_text: "What command creates a new branch?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "git branch <name>", is_correct: true },
+					{ answer_text: "git create <name>", is_correct: false },
+					{ answer_text: "git new <name>", is_correct: false },
+					{ answer_text: "git add-branch <name>", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "CSS Selectors",
+		description: "CSS selector types",
+		questions: [
+			{
+				question_text: "Which selector targets a class?",
+				order_index: 0,
+				answers: [
+					{ answer_text: ".classname", is_correct: true },
+					{ answer_text: "#classname", is_correct: false },
+					{ answer_text: "@classname", is_correct: false },
+					{ answer_text: "*classname", is_correct: false },
+				],
+			},
+			{
+				question_text: "Which selector targets all elements?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "*", is_correct: true },
+					{ answer_text: "all", is_correct: false },
+					{ answer_text: ".", is_correct: false },
+					{ answer_text: "#", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "HTML Forms",
+		description: "HTML form elements",
+		questions: [
+			{
+				question_text: "Which tag creates a form?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "<form>", is_correct: true },
+					{ answer_text: "<input>", is_correct: false },
+					{ answer_text: "<fieldset>", is_correct: false },
+					{ answer_text: "<div>", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "JavaScript Functions",
+		description: "Function declarations and expressions",
+		questions: [
+			{
+				question_text: "What is an arrow function?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "A shorter syntax for writing functions", is_correct: true },
+					{ answer_text: "A type of loop", is_correct: false },
+					{ answer_text: "A database query", is_correct: false },
+					{ answer_text: "A CSS property", is_correct: false },
+				],
+			},
+			{
+				question_text: "How do you call a function?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "functionName()", is_correct: true },
+					{ answer_text: "call functionName", is_correct: false },
+					{ answer_text: "functionName.call", is_correct: false },
+					{ answer_text: "execute functionName", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "React Props",
+		description: "Understanding React props",
+		questions: [
+			{
+				question_text: "What are props in React?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Data passed to components", is_correct: true },
+					{ answer_text: "CSS properties", is_correct: false },
+					{ answer_text: "Database queries", is_correct: false },
+					{ answer_text: "Event handlers", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "TypeScript Types",
+		description: "Basic TypeScript types",
+		questions: [
+			{
+				question_text: "How do you declare a variable with a type?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "let x: string = 'hello'", is_correct: true },
+					{ answer_text: "let x string = 'hello'", is_correct: false },
+					{ answer_text: "let x::string = 'hello'", is_correct: false },
+					{ answer_text: "let x<string> = 'hello'", is_correct: false },
+				],
+			},
+			{
+				question_text: "What is the type of 'null' in TypeScript?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "null", is_correct: true },
+					{ answer_text: "undefined", is_correct: false },
+					{ answer_text: "void", is_correct: false },
+					{ answer_text: "never", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "HTTP Methods",
+		description: "HTTP request methods",
+		questions: [
+			{
+				question_text: "Which HTTP method updates an existing resource?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "PUT or PATCH", is_correct: true },
+					{ answer_text: "GET", is_correct: false },
+					{ answer_text: "POST", is_correct: false },
+					{ answer_text: "DELETE", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Linux File Permissions",
+		description: "Understanding file permissions",
+		questions: [
+			{
+				question_text: "What does 'chmod' do?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Changes file permissions", is_correct: true },
+					{ answer_text: "Changes file name", is_correct: false },
+					{ answer_text: "Changes file location", is_correct: false },
+					{ answer_text: "Changes file content", is_correct: false },
+				],
+			},
+			{
+				question_text: "What does 'chown' do?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "Changes file ownership", is_correct: true },
+					{ answer_text: "Changes file permissions", is_correct: false },
+					{ answer_text: "Changes file name", is_correct: false },
+					{ answer_text: "Changes file size", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Docker Containers",
+		description: "Docker container management",
+		questions: [
+			{
+				question_text: "Which command stops a running container?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "docker stop", is_correct: true },
+					{ answer_text: "docker kill", is_correct: false },
+					{ answer_text: "docker pause", is_correct: false },
+					{ answer_text: "docker end", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Data Structures",
+		description: "Common data structures",
+		questions: [
+			{
+				question_text: "What is a linked list?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "A linear data structure with nodes", is_correct: true },
+					{ answer_text: "A type of array", is_correct: false },
+					{ answer_text: "A database table", is_correct: false },
+					{ answer_text: "A sorting algorithm", is_correct: false },
+				],
+			},
+			{
+				question_text: "What is a binary tree?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "A tree with at most 2 children per node", is_correct: true },
+					{ answer_text: "A tree with exactly 2 nodes", is_correct: false },
+					{ answer_text: "A tree with 2 levels", is_correct: false },
+					{ answer_text: "A tree with 2 roots", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Web Security",
+		description: "Basic web security concepts",
+		questions: [
+			{
+				question_text: "What is CORS?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Cross-Origin Resource Sharing", is_correct: true },
+					{ answer_text: "Cross-Origin Request Security", is_correct: false },
+					{ answer_text: "Client Origin Resource Sharing", is_correct: false },
+					{ answer_text: "Cross-Origin Response Sharing", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Next.js Routing",
+		description: "Next.js file-based routing",
+		questions: [
+			{
+				question_text: "How does Next.js handle routing?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "File-based routing", is_correct: true },
+					{ answer_text: "Config-based routing", is_correct: false },
+					{ answer_text: "Database routing", is_correct: false },
+					{ answer_text: "Manual routing only", is_correct: false },
+				],
+			},
+			{
+				question_text: "What folder contains pages in Next.js?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "app or pages", is_correct: true },
+					{ answer_text: "routes", is_correct: false },
+					{ answer_text: "views", is_correct: false },
+					{ answer_text: "components", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "JavaScript Objects",
+		description: "Working with JavaScript objects",
+		questions: [
+			{
+				question_text: "How do you access an object property?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "obj.property or obj['property']", is_correct: true },
+					{ answer_text: "obj->property", is_correct: false },
+					{ answer_text: "obj::property", is_correct: false },
+					{ answer_text: "obj.property()", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Python Functions",
+		description: "Python function basics",
+		questions: [
+			{
+				question_text: "What keyword defines a function in Python?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "def", is_correct: true },
+					{ answer_text: "function", is_correct: false },
+					{ answer_text: "func", is_correct: false },
+					{ answer_text: "define", is_correct: false },
+				],
+			},
+			{
+				question_text: "What is a lambda function?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "An anonymous function", is_correct: true },
+					{ answer_text: "A named function", is_correct: false },
+					{ answer_text: "A class method", is_correct: false },
+					{ answer_text: "A module", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "CSS Flexbox",
+		description: "CSS Flexbox layout",
+		questions: [
+			{
+				question_text: "What property enables flexbox?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "display: flex", is_correct: true },
+					{ answer_text: "flex: true", is_correct: false },
+					{ answer_text: "layout: flexbox", is_correct: false },
+					{ answer_text: "flexbox: enable", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "HTML Semantic Tags",
+		description: "Semantic HTML elements",
+		questions: [
+			{
+				question_text: "Which tag represents the main content?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "<main>", is_correct: true },
+					{ answer_text: "<content>", is_correct: false },
+					{ answer_text: "<body>", is_correct: false },
+					{ answer_text: "<div>", is_correct: false },
+				],
+			},
+			{
+				question_text: "Which tag represents a navigation section?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "<nav>", is_correct: true },
+					{ answer_text: "<navigation>", is_correct: false },
+					{ answer_text: "<menu>", is_correct: false },
+					{ answer_text: "<links>", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "React State",
+		description: "React state management",
+		questions: [
+			{
+				question_text: "Which hook manages state?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "useState", is_correct: true },
+					{ answer_text: "useEffect", is_correct: false },
+					{ answer_text: "useContext", is_correct: false },
+					{ answer_text: "useReducer", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "SQL Joins",
+		description: "SQL join operations",
+		questions: [
+			{
+				question_text: "What does INNER JOIN do?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Returns matching rows from both tables", is_correct: true },
+					{ answer_text: "Returns all rows from both tables", is_correct: false },
+					{ answer_text: "Returns only left table rows", is_correct: false },
+					{ answer_text: "Returns only right table rows", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Git Merge",
+		description: "Git merge operations",
+		questions: [
+			{
+				question_text: "What does 'git merge' do?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Combines branches", is_correct: true },
+					{ answer_text: "Creates a branch", is_correct: false },
+					{ answer_text: "Deletes a branch", is_correct: false },
+					{ answer_text: "Renames a branch", is_correct: false },
+				],
+			},
+			{
+				question_text: "What is a merge conflict?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "When Git can't automatically merge changes", is_correct: true },
+					{ answer_text: "When branches are identical", is_correct: false },
+					{ answer_text: "When a branch is deleted", is_correct: false },
+					{ answer_text: "When commits are missing", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "JavaScript Async",
+		description: "Asynchronous JavaScript",
+		questions: [
+			{
+				question_text: "What is async/await?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Syntax for handling promises", is_correct: true },
+					{ answer_text: "A type of loop", is_correct: false },
+					{ answer_text: "A database query", is_correct: false },
+					{ answer_text: "A CSS property", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "TypeScript Interfaces",
+		description: "TypeScript interface definitions",
+		questions: [
+			{
+				question_text: "How do you define an interface?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "interface Name { ... }", is_correct: true },
+					{ answer_text: "interface = { ... }", is_correct: false },
+					{ answer_text: "def interface Name", is_correct: false },
+					{ answer_text: "interface Name()", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "REST API Status Codes",
+		description: "HTTP status codes",
+		questions: [
+			{
+				question_text: "What does status code 404 mean?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Not Found", is_correct: true },
+					{ answer_text: "Server Error", is_correct: false },
+					{ answer_text: "Unauthorized", is_correct: false },
+					{ answer_text: "Bad Request", is_correct: false },
+				],
+			},
+			{
+				question_text: "What does status code 500 mean?",
+				order_index: 1,
+				answers: [
+					{ answer_text: "Internal Server Error", is_correct: true },
+					{ answer_text: "Not Found", is_correct: false },
+					{ answer_text: "Unauthorized", is_correct: false },
+					{ answer_text: "Bad Request", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Linux Processes",
+		description: "Linux process management",
+		questions: [
+			{
+				question_text: "Which command lists running processes?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "ps", is_correct: true },
+					{ answer_text: "ls", is_correct: false },
+					{ answer_text: "list", is_correct: false },
+					{ answer_text: "proc", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Docker Images",
+		description: "Docker image management",
+		questions: [
+			{
+				question_text: "Which command lists Docker images?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "docker images", is_correct: true },
+					{ answer_text: "docker list", is_correct: false },
+					{ answer_text: "docker show", is_correct: false },
+					{ answer_text: "docker ps", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Algorithms",
+		description: "Basic algorithm concepts",
+		questions: [
+			{
+				question_text: "What is the time complexity of linear search?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "O(n)", is_correct: true },
+					{ answer_text: "O(log n)", is_correct: false },
+					{ answer_text: "O(1)", is_correct: false },
+					{ answer_text: "O(n²)", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Password Security",
+		description: "Password security best practices",
+		questions: [
+			{
+				question_text: "What makes a strong password?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "Long, complex, and unique", is_correct: true },
+					{ answer_text: "Short and simple", is_correct: false },
+					{ answer_text: "Your name and birthdate", is_correct: false },
+					{ answer_text: "123456", is_correct: false },
+				],
+			},
+		],
+	},
+	{
+		title: "Next.js API Routes",
+		description: "Next.js API route handlers",
+		questions: [
+			{
+				question_text: "Where are API routes defined in Next.js App Router?",
+				order_index: 0,
+				answers: [
+					{ answer_text: "In route.ts or route.js files", is_correct: true },
+					{ answer_text: "In api.ts files", is_correct: false },
+					{ answer_text: "In server.ts files", is_correct: false },
+					{ answer_text: "In config files", is_correct: false },
+				],
+			},
+		],
+	},
 ]
 
 async function createUser(email: string, password: string, name?: string, surname?: string) {
@@ -861,7 +1503,7 @@ async function createUser(email: string, password: string, name?: string, surnam
 	return data.user
 }
 
-async function createTest(userId: string, template: typeof testTemplates[0]) {
+async function createTest(userId: string, template: typeof testTemplates[0], maxQuestions: number = 2) {
 	const { data: test, error: testError } = await supabase
 		.from("tests")
 		.insert({
@@ -877,39 +1519,54 @@ async function createTest(userId: string, template: typeof testTemplates[0]) {
 		return null
 	}
 
-	console.log(`Test created: ${template.title} (${test.id})`)
+	// Limit questions to maxQuestions (default 2)
+	const questionsToCreate = template.questions.slice(0, maxQuestions)
 
-	// Create questions and answers
-	for (const questionTemplate of template.questions) {
-		const { data: question, error: questionError } = await supabase
-			.from("questions")
-			.insert({
-				question_text: questionTemplate.question_text,
-				order_index: questionTemplate.order_index,
-				test_id: test.id,
-			})
-			.select()
-			.single()
+	// Prepare all questions for batch insert
+	const questionsData = questionsToCreate.map((q, i) => ({
+		question_text: q.question_text,
+		order_index: i,
+		test_id: test.id,
+	}))
 
-		if (questionError) {
-			console.error(`Error creating question:`, questionError)
-			continue
-		}
+	// Batch insert all questions
+	const { data: questions, error: questionsError } = await supabase
+		.from("questions")
+		.insert(questionsData)
+		.select()
 
-		// Create answers for this question
-		for (const answerTemplate of questionTemplate.answers) {
-			const { error: answerError } = await supabase.from("answers").insert({
-				answer_text: answerTemplate.answer_text,
-				is_correct: answerTemplate.is_correct,
-				question_id: question.id,
-			})
+	if (questionsError) {
+		console.error(`Error creating questions for test ${template.title}:`, questionsError)
+		return test
+	}
 
-			if (answerError) {
-				console.error(`Error creating answer:`, answerError)
+	if (!questions || questions.length === 0) {
+		return test
+	}
+
+	// Prepare all answers for batch insert
+	const answersData: Array<{ answer_text: string; is_correct: boolean; question_id: string }> = []
+	for (let i = 0; i < questionsToCreate.length; i++) {
+		const questionTemplate = questionsToCreate[i]
+		const question = questions[i]
+		if (question) {
+			for (const answerTemplate of questionTemplate.answers) {
+				answersData.push({
+					answer_text: answerTemplate.answer_text,
+					is_correct: answerTemplate.is_correct,
+					question_id: question.id,
+				})
 			}
 		}
+	}
 
-		console.log(`  Question created: ${questionTemplate.question_text}`)
+	// Batch insert all answers
+	if (answersData.length > 0) {
+		const { error: answersError } = await supabase.from("answers").insert(answersData)
+
+		if (answersError) {
+			console.error(`Error creating answers for test ${template.title}:`, answersError)
+		}
 	}
 
 	return test
@@ -918,19 +1575,12 @@ async function createTest(userId: string, template: typeof testTemplates[0]) {
 async function seedDatabase() {
 	console.log("Starting database seeding...\n")
 
-	// Create users
-	const users = []
-	for (const userData of dummyUsers) {
-		const user = await createUser(
-			userData.email,
-			userData.password,
-			userData.name,
-			userData.surname,
-		)
-		if (user) {
-			users.push(user)
-		}
-	}
+	// Create users in parallel
+	const userPromises = dummyUsers.map(userData =>
+		createUser(userData.email, userData.password, userData.name, userData.surname)
+	)
+	const userResults = await Promise.all(userPromises)
+	const users = userResults.filter((user): user is NonNullable<typeof user> => user !== null)
 
 	if (users.length === 0) {
 		console.error("No users were created. Aborting seeding.")
@@ -939,22 +1589,33 @@ async function seedDatabase() {
 
 	console.log(`\nCreated ${users.length} users\n`)
 
-	// Create tests for each user
+	// Create tests for each user with parallelization
+	// Create many tests with at most 2 questions each
 	let totalTests = 0
+	const BATCH_SIZE = 10 // Process tests in batches to avoid overwhelming the database
+
 	for (let i = 0; i < users.length; i++) {
 		const user = users[i]
-		// Each user gets 2-3 random tests
-		const testsPerUser = Math.floor(Math.random() * 2) + 2
+		// Each user gets 8-12 tests (much more than before)
+		const testsPerUser = Math.floor(Math.random() * 5) + 8
 		const shuffledTemplates = [...testTemplates].sort(() => Math.random() - 0.5)
 
-		for (let j = 0; j < testsPerUser && j < shuffledTemplates.length; j++) {
-			const template = shuffledTemplates[j]
-			const test = await createTest(user.id, template)
-			if (test) {
-				totalTests++
-			}
+		// Prepare all test creation promises
+		const testPromises = []
+		for (let j = 0; j < testsPerUser; j++) {
+			const templateIndex = j % shuffledTemplates.length
+			const template = shuffledTemplates[templateIndex]
+			testPromises.push(createTest(user.id, template, 2))
 		}
-		console.log(`\nCreated tests for user ${user.email}\n`)
+
+		// Process tests in batches for better performance
+		for (let batchStart = 0; batchStart < testPromises.length; batchStart += BATCH_SIZE) {
+			const batch = testPromises.slice(batchStart, batchStart + BATCH_SIZE)
+			const results = await Promise.all(batch)
+			totalTests += results.filter(test => test !== null).length
+		}
+
+		console.log(`Created ${testsPerUser} tests for user ${user.email}`)
 	}
 
 	console.log(`\n✅ Seeding completed!`)

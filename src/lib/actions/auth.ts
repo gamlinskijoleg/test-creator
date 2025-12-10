@@ -110,3 +110,31 @@ export async function signOut() {
 		}
 	}
 }
+
+// Exchange code for session (email confirmation)
+export async function exchangeCodeForSession(code: string) {
+	try {
+		const supabase = await createSupabaseServerClient()
+		const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+		if (error) {
+			return {
+				success: false,
+				error: error.message,
+				user: null,
+			}
+		}
+
+		return {
+			success: true,
+			error: null,
+			user: data.user,
+		}
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to verify email",
+			user: null,
+		}
+	}
+}
