@@ -115,7 +115,7 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 									<Stack gap="md">
 										<Stack gap="xs">
 											<Group justify="space-between" align="flex-start">
-												<Title order={4} c="dark.6">
+												<Title order={4} c="white">
 													{t("results.question", { index: index + 1 })}: {question.question_text}
 												</Title>
 												<Badge
