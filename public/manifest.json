@@ -1,0 +1,22 @@
+{
+	"name": "Testy - Create & Take Interactive Tests",
+	"short_name": "Testy",
+	"description": "Build interactive quizzes and tests with ease. Share them with others and track results in real-time.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#000000",
+	"theme_color": "#000000",
+	"orientation": "portrait-primary",
+	"icons": [
+		{
+			"src": "/favicon.ico",
+			"sizes": "any",
+			"type": "image/x-icon",
+			"purpose": "any maskable"
+		}
+	],
+	"categories": ["education", "productivity"],
+	"lang": "en",
+	"dir": "ltr"
+}
+

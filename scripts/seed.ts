@@ -18,7 +18,6 @@ const dummyUsers = [
 	{ email: "charlie@example.com", password: "password123", name: "Charlie", surname: "Brown" },
 	{ email: "diana@example.com", password: "password123", name: "Diana", surname: "Williams" },
 	{ email: "eve@example.com", password: "password123", name: "Eve", surname: "Davis" },
-	{ email: "k7au1@berehynia.pp.ua", password: "qwerty", name: "Admin", surname: "User" },
 ]
 
 // Test templates with questions and answers
