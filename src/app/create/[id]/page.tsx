@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { getTest, saveTestQuestions } from "@/lib/actions/tests"
 import { useUser } from "@/lib/hooks/useUser"
 import { TestBuilder } from "@/components/TestBuilder"
-import { ShareButtons } from "@/components/ShareButtons"
+import { CopyLinkButton, ShareButton } from "@/components/ShareButtons"
 import { Container, Card, Title, Text, Stack, Group, Button, Loader, Alert } from "@mantine/core"
 import { IconArrowLeft, IconAlertCircle } from "@tabler/icons-react"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
@@ -119,7 +119,10 @@ export default function EditTestPage() {
 						<Title order={1}>{test.title}</Title>
 						{test.description && <Text c="dimmed">{test.description}</Text>}
 					</Stack>
-					<ShareButtons testId={testId} testTitle={test.title} />
+					<Group gap="xs">
+						<ShareButton testId={testId} testTitle={test.title} />
+						<CopyLinkButton testId={testId} />
+					</Group>
 				</Group>
 
 				<TestBuilder testId={testId} initialQuestions={questions} onSave={handleSave} />

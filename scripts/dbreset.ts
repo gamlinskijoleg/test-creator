@@ -1,3 +1,4 @@
+import { Database } from '@/types/supabase'
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -9,7 +10,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error(`Missing Supabase environment variables`)
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
 const tables = [
   'given_answers',

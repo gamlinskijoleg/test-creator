@@ -261,6 +261,90 @@ export async function submitTest(testId: string, answers: Record<string, string>
 	}
 }
 
+type TestResultWithProfile = Tables<"test_results"> & {
+	profile?: {
+		name: string | null
+		surname: string | null
+	} | null
+}
+
+// Get all attempts for a test (only for the author)
+export async function getTestResultsForOwner(testId: string, ownerId: string) {
+	try {
+		const supabase = await createSupabaseServerClient()
+
+		// Ensure test belongs to the owner
+		const { data: test, error: testError } = await supabase.from("tests").select("*").eq("id", testId).single()
+		if (testError || !test) {
+			return {
+				success: false,
+				error: testError?.message || "Test not found",
+				results: [],
+				questionCount: 0,
+				test: null,
+			}
+		}
+
+		if (test.author_id !== ownerId) {
+			return { success: false, error: "Unauthorized", results: [], questionCount: 0, test: null }
+		}
+
+		// Count questions to compute percentages
+		const { count: questionCount = 0 } = await supabase
+			.from("questions")
+			.select("id", { count: "exact", head: true })
+			.eq("test_id", testId)
+
+		const normalizedQuestionCount = questionCount ?? 0
+
+		const { data: results, error: resultsError } = await supabase
+			.from("test_results")
+			.select("id, score, taken_at, user_id, test_id")
+			.eq("test_id", testId)
+			.order("taken_at", { ascending: false })
+
+		if (resultsError) {
+			return { success: false, error: resultsError.message, results: [], questionCount: normalizedQuestionCount, test }
+		}
+
+		const userIds = Array.from(new Set((results || []).map(r => r.user_id).filter(Boolean))) as string[]
+		let profilesMap: Record<string, { name: string | null; surname: string | null }> = {}
+
+		if (userIds.length > 0) {
+			const { data: profiles } = await supabase.from("profiles").select("user_id, name, surname").in("user_id", userIds)
+
+			if (profiles) {
+				profilesMap = profiles.reduce(
+					(acc, profile) => ({ ...acc, [profile.user_id]: { name: profile.name, surname: profile.surname } }),
+					{},
+				)
+			}
+		}
+
+		const enrichedResults: TestResultWithProfile[] =
+			results?.map(r => ({
+				...r,
+				profile: r.user_id ? (profilesMap[r.user_id] ?? null) : null,
+			})) ?? []
+
+		return {
+			success: true,
+			error: null,
+			results: enrichedResults,
+			questionCount: normalizedQuestionCount,
+			test,
+		}
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to fetch results",
+			results: [],
+			questionCount: 0,
+			test: null,
+		}
+	}
+}
+
 // Get test result with details
 export async function getTestResult(resultId: string) {
 	try {

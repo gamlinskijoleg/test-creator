@@ -24,7 +24,7 @@ import {
 	Badge,
 } from "@mantine/core"
 import { IconPlayerPlay, IconUser, IconSearch, IconX, IconFilter } from "@tabler/icons-react"
-import { ShareButtons } from "@/components/ShareButtons"
+import { CopyLinkButton, ShareButton } from "@/components/ShareButtons"
 import type { Tables } from "@/types/supabase"
 
 type Test = Tables<"tests"> & {
@@ -251,13 +251,27 @@ export default function TestsPage() {
 												transition: "opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
 											}}
 										>
-											<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+											<Card
+												shadow="xl"
+												padding="lg"
+												radius="lg"
+												withBorder
+												h="100%"
+												style={{
+													background: "linear-gradient(135deg, rgba(14,165,233,0.08), rgba(236,72,153,0.08))",
+													borderColor: "rgba(99,102,241,0.2)",
+												}}
+											>
 												<Stack gap="md" justify="space-between" h="100%">
-													<Stack gap="xs">
+													<Stack gap="sm">
 														<Title order={3}>{test.title}</Title>
-														{test.description && (
-															<Text c="dimmed" lineClamp={2}>
+														{test.description ? (
+															<Text c="dimmed" lineClamp={3}>
 																{test.description}
+															</Text>
+														) : (
+															<Text c="dimmed" size="sm">
+																{t("dashboard.emptyCta")}
 															</Text>
 														)}
 														<Group gap="xs" align="center">
@@ -272,14 +286,15 @@ export default function TestsPage() {
 															</Text>
 														)}
 													</Stack>
-													<Stack gap="xs">
-														<Group gap="xs">
+
+													<Stack gap="sm">
+														<Group gap="xs" grow>
 															{isOwner && (
 																<Button
 																	component={Link}
 																	href={`/create/${test.id}`}
 																	variant="outline"
-																	style={{ flex: 1 }}
+																	leftSection={<IconUser size={14} />}
 																>
 																	{t("tests.edit")}
 																</Button>
@@ -287,13 +302,16 @@ export default function TestsPage() {
 															<Button
 																component={Link}
 																href={`/test/${test.id}`}
-																style={{ flex: isOwner ? 1 : undefined, width: isOwner ? undefined : "100%" }}
+																variant="filled"
 																leftSection={<IconPlayerPlay size={16} />}
 															>
 																{t("tests.take")}
 															</Button>
 														</Group>
-														<ShareButtons testId={test.id} testTitle={test.title} />
+														<Group gap="xs" justify="flex-start">
+															<ShareButton testId={test.id} testTitle={test.title} iconOnly />
+															<CopyLinkButton testId={test.id} iconOnly />
+														</Group>
 													</Stack>
 												</Stack>
 											</Card>

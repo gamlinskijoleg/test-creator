@@ -179,12 +179,7 @@ export default function AccountPage() {
 					<Group justify="space-between">
 						<Title order={1}>{t("account.title")}</Title>
 						<Group gap="xs">
-							<Button
-								component={Link}
-								href="/dashboard"
-								variant="subtle"
-								leftSection={<IconArrowLeft size={16} />}
-							>
+							<Button component={Link} href="/dashboard" variant="subtle" leftSection={<IconArrowLeft size={16} />}>
 								{t("account.back")}
 							</Button>
 							<Button

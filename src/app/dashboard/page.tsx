@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getUserTestsPaginated } from "@/lib/actions/user"
 import { Container, Title, Button, Card, Text, Grid, GridCol, Stack, Group, Loader } from "@mantine/core"
-import { IconPlus, IconEdit, IconPlayerPlay } from "@tabler/icons-react"
-import { ShareButtons } from "@/components/ShareButtons"
+import { IconPlus, IconEdit, IconPlayerPlay, IconHistory } from "@tabler/icons-react"
+import { CopyLinkButton, ShareButton } from "@/components/ShareButtons"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 import type { Tables } from "@/types/supabase"
 
@@ -129,37 +129,67 @@ export default function DashboardPage() {
 						<Grid>
 							{tests.map(test => (
 								<GridCol key={test.id} span={{ base: 12, md: 6, lg: 4 }}>
-									<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+									<Card
+										shadow="xl"
+										padding="lg"
+										radius="lg"
+										withBorder
+										h="100%"
+										style={{
+											background: "linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.08))",
+											borderColor: "rgba(99,102,241,0.25)",
+										}}
+									>
 										<Stack gap="md" justify="space-between" h="100%">
 											<Stack gap="xs">
 												<Title order={3}>{test.title}</Title>
-												{test.description && (
-													<Text c="dimmed" lineClamp={2}>
+												{test.description ? (
+													<Text c="dimmed" lineClamp={3}>
 														{test.description}
+													</Text>
+												) : (
+													<Text c="dimmed" size="sm">
+														{t("dashboard.emptyCta")}
 													</Text>
 												)}
 											</Stack>
-											<Stack gap="xs">
-												<Group gap="xs">
+
+											<Stack gap="sm">
+												<Button
+													component={Link}
+													href={`/test/${test.id}`}
+													variant="filled"
+													leftSection={<IconPlayerPlay size={16} />}
+												>
+													{t("tests.take")}
+												</Button>
+												<Group gap="xs" grow>
 													<Button
 														component={Link}
 														href={`/create/${test.id}`}
 														variant="outline"
-														style={{ flex: 1 }}
 														leftSection={<IconEdit size={16} />}
 													>
 														{t("tests.edit")}
 													</Button>
+												</Group>
+												<Group gap="xs" grow>
 													<Button
 														component={Link}
-														href={`/test/${test.id}`}
-														style={{ flex: 1 }}
-														leftSection={<IconPlayerPlay size={16} />}
-													>
-														{t("tests.take")}
-													</Button>
+														href={`/dashboard/tests/${test.id}/results`}
+														variant="light"
+														color="grape"
+														leftSection={<IconHistory size={16} />}
+														aria-label={t("dashboard.results")}
+														title={t("dashboard.results")}
+														px="xs"
+														size="sm"
+													/>
+													<Group gap="xs" justify="flex-end">
+														<ShareButton testId={test.id} testTitle={test.title} iconOnly />
+														<CopyLinkButton testId={test.id} iconOnly />
+													</Group>
 												</Group>
-												<ShareButtons testId={test.id} testTitle={test.title} />
 											</Stack>
 										</Stack>
 									</Card>

@@ -67,7 +67,8 @@
 		"create": "Create New Test",
 		"empty": "You haven't created any tests yet.",
 		"emptyCta": "Create Your First Test",
-		"loadingMore": "Loading more tests..."
+		"loadingMore": "Loading more tests...",
+		"results": "Results"
 	},
 	"createForm": {
 		"title": "Create New Test",
@@ -180,6 +181,21 @@
 			"other": "Other",
 			"none": "Prefer not to say"
 		}
+	},
+	"resultsHistory": {
+		"title": "Test Attempts",
+		"subtitle": "Attempts for “{{title}}”",
+		"subtitleFallback": "Attempts history",
+		"back": "Back to dashboard",
+		"tableTitle": "History",
+		"totalAttempts": "Total attempts: {{count}}",
+		"empty": "No attempts yet.",
+		"participant": "Participant",
+		"score": "Score",
+		"takenAt": "Taken at",
+		"view": "Open result",
+		"anonymous": "Anonymous",
+		"scoreValue": "Score: {{score}} / {{total}}"
 	}
 }
 

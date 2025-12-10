@@ -34,47 +34,63 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 	const { t } = useTranslation()
 
 	return (
-		<Container size="md">
-			<Stack gap="lg">
-				<Card shadow="sm" padding="lg" radius="md" withBorder>
+		<Container size="lg">
+			<Stack gap="xl">
+				<Card
+					shadow="xl"
+					padding="lg"
+					radius="lg"
+					withBorder
+					style={{
+						background: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #ec4899 100%)",
+						color: "#fff",
+					}}
+				>
 					<Stack gap="md">
-						<Title order={1}>{t("results.title")}</Title>
-						<Title order={2} size="h3" c="dimmed">
-							{result.test.title}
+						<Title order={1} c="#fff">
+							{t("results.title")}
 						</Title>
+						<Group justify="space-between" align="center">
+							<Title order={2} size="h3" c="rgba(255,255,255,0.85)">
+								{result.test.title}
+							</Title>
+							<Badge color="yellow" variant="light" size="lg">
+								{t("results.score")} {percentage.toFixed(1)}%
+							</Badge>
+						</Group>
 
 						<Grid>
 							<GridCol span={{ base: 12, sm: 4 }}>
-								<Paper p="md" withBorder bg="blue.1">
+								<Paper p="md" withBorder bg="teal.0" radius="md" style={{ borderColor: "rgba(14,165,233,0.2)" }}>
 									<Stack gap="xs" align="center">
-										<Text size="2.5rem" fw={700} c="blue">
+										<Text size="2.5rem" fw={700} c="teal.8">
 											{score}
 										</Text>
-										<Text size="sm" c="dimmed">
+										<Text size="sm" c="teal.6">
 											{t("results.correct")}
 										</Text>
 									</Stack>
 								</Paper>
 							</GridCol>
 							<GridCol span={{ base: 12, sm: 4 }}>
-								<Paper p="md" withBorder>
+								<Paper p="md" withBorder bg="violet.0" radius="md" style={{ borderColor: "rgba(99,102,241,0.2)" }}>
 									<Stack gap="xs" align="center">
-										<Text size="2.5rem" fw={700} c="dimmed">
+										<Text size="2.5rem" fw={700} c="violet.8">
 											{totalQuestions}
 										</Text>
-										<Text size="sm" c="dimmed">
+										<Text size="sm" c="violet.6">
 											{t("results.total")}
 										</Text>
 									</Stack>
 								</Paper>
 							</GridCol>
 							<GridCol span={{ base: 12, sm: 4 }}>
-								<Paper p="md" withBorder bg="green.1">
+								<Paper p="md" withBorder bg="orange.0" radius="md" style={{ borderColor: "rgba(234,88,12,0.25)" }}>
 									<Stack gap="xs" align="center">
-										<Text size="2.5rem" fw={700} c="green">
+										<Text size="2.5rem" fw={700} c="orange.8">
 											{percentage.toFixed(1)}%
 										</Text>
-										<Text size="sm" c="dimmed">
+										<Text size="sm" c="orange.6">
 											{t("results.score")}
 										</Text>
 									</Stack>
@@ -95,15 +111,15 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 							const isCorrect = selectedAnswer?.is_correct ?? false
 
 							return (
-								<Card key={givenAnswer.id} shadow="sm" padding="lg" radius="md" withBorder>
+								<Card key={givenAnswer.id} shadow="sm" padding="lg" radius="lg" withBorder>
 									<Stack gap="md">
 										<Stack gap="xs">
 											<Group justify="space-between" align="flex-start">
-												<Title order={4}>
+												<Title order={4} c="dark.6">
 													{t("results.question", { index: index + 1 })}: {question.question_text}
 												</Title>
 												<Badge
-													color={isCorrect ? "green" : "red"}
+													color={isCorrect ? "teal" : "pink"}
 													leftSection={isCorrect ? <IconCheck size={14} /> : <IconX size={14} />}
 												>
 													{isCorrect ? t("results.badgeCorrect") : t("results.badgeIncorrect")}
@@ -115,7 +131,14 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 											<Text size="sm" fw={500} c="dimmed">
 												{t("results.yourAnswer")}
 											</Text>
-											<Paper p="sm" withBorder bg={isCorrect ? "green.1" : "red.1"} c={isCorrect ? "green.9" : "red.9"}>
+											<Paper
+												p="sm"
+												withBorder
+												bg={isCorrect ? "teal.0" : "pink.0"}
+												c={isCorrect ? "teal.9" : "pink.9"}
+												radius="md"
+												style={{ borderColor: isCorrect ? "rgba(20,184,166,0.4)" : "rgba(236,72,153,0.35)" }}
+											>
 												{selectedAnswer?.answer_text ?? t("results.noAnswer")}
 											</Paper>
 
@@ -124,7 +147,14 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 													<Text size="sm" fw={500} c="dimmed">
 														{t("results.correctAnswer")}
 													</Text>
-													<Paper p="sm" withBorder bg="green.1" c="green.9">
+													<Paper
+														p="sm"
+														withBorder
+														bg="violet.0"
+														c="violet.9"
+														radius="md"
+														style={{ borderColor: "rgba(99,102,241,0.35)" }}
+													>
 														{correctAnswer.answer_text}
 													</Paper>
 												</>
