@@ -3,6 +3,9 @@ import { CreateTestForm } from "@/components/CreateTestForm"
 import { Card, Container, Title, Text, Stack, Button } from "@mantine/core"
 import Link from "next/link"
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = "force-dynamic"
+
 export default async function CreateTestPage() {
 	const { user } = await getSession()
 
@@ -25,5 +28,5 @@ export default async function CreateTestPage() {
 		)
 	}
 
-	return <CreateTestForm user={user} />
+	return <CreateTestForm userId={user.id} />
 }

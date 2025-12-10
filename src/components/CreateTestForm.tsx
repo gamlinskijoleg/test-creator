@@ -8,10 +8,8 @@ import { z } from "zod"
 import { createTest } from "@/lib/actions/tests"
 import { Card, Title, TextInput, Textarea, Button, Stack, Alert, Group, Container } from "@mantine/core"
 import { IconAlertCircle, IconX } from "@tabler/icons-react"
-import type { User } from "@supabase/supabase-js"
-
 type CreateTestFormProps = {
-	user: User
+	userId: string
 }
 
 const createTestSchema = z.object({
@@ -21,7 +19,7 @@ const createTestSchema = z.object({
 
 type CreateTestFormData = z.infer<typeof createTestSchema>
 
-export function CreateTestForm({ user }: CreateTestFormProps) {
+export function CreateTestForm({ userId }: CreateTestFormProps) {
 	const router = useRouter()
 	const [error, setError] = useState<string | null>(null)
 
@@ -41,7 +39,7 @@ export function CreateTestForm({ user }: CreateTestFormProps) {
 		setError(null)
 
 		try {
-			const result = await createTest(data.title, data.description || null, user.id)
+			const result = await createTest(data.title, data.description || null, userId)
 
 			if (!result.success || !result.test) {
 				throw new Error(result.error || "Failed to create test")
