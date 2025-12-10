@@ -14,7 +14,7 @@ export function LanguageSwitcher() {
 
 	const options = useMemo(
 		() =>
-			SUPPORTED_LOCALES.map((value) => ({
+			SUPPORTED_LOCALES.map(value => ({
 				value,
 				label: t(`language.${value}`),
 			})),
@@ -44,4 +44,3 @@ export function LanguageSwitcher() {
 		/>
 	)
 }
-
