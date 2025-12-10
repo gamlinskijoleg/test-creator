@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { getTest, saveTestQuestions } from "@/lib/actions"
+import { getTest, saveTestQuestions } from "@/lib/actions/tests"
+import { getSession } from "@/lib/actions/auth"
 import { TestBuilder } from "@/components/TestBuilder"
-import { Card } from "@/components/ui/Card"
 import { ShareButtons } from "@/components/ShareButtons"
+import { Container, Card, Title, Text, Stack, Group, Button, Loader, Alert } from "@mantine/core"
+import { IconArrowLeft, IconAlertCircle } from "@tabler/icons-react"
 import type { Tables } from "@/types/supabase"
 import type { User } from "@supabase/supabase-js"
 
@@ -15,9 +16,9 @@ type Question = Tables<"questions"> & {
 }
 
 export default function EditTestPage() {
-	const params = useParams()
+	const params = useParams<{ id: string }>()
 	const router = useRouter()
-	const testId = params.id as string
+	const testId = params.id
 
 	const [user, setUser] = useState<User | null>(null)
 	const [test, setTest] = useState<Tables<"tests"> | null>(null)
@@ -27,12 +28,10 @@ export default function EditTestPage() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession()
-			setUser(session?.user ?? null)
+			const { user } = await getSession()
+			setUser(user)
 
-			if (!session?.user) {
+			if (!user) {
 				setLoading(false)
 				return
 			}
@@ -70,77 +69,69 @@ export default function EditTestPage() {
 			alert("Test saved successfully!")
 		} catch (err) {
 			console.error("Error saving test:", err)
-			alert(
-				err instanceof Error
-					? `Failed to save test: ${err.message}`
-					: "Failed to save test. Please try again.",
-			)
+			alert(err instanceof Error ? `Failed to save test: ${err.message}` : "Failed to save test. Please try again.")
 			throw err
 		}
 	}
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="text-gray-600 dark:text-gray-400">Loading...</div>
-			</div>
+			<Container
+				size="xl"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Loader />
+			</Container>
 		)
 	}
 
 	if (error || !test) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Error</h1>
-					<p className="text-gray-600 dark:text-gray-400 mb-4">
-						{error || "Test not found"}
-					</p>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="md">
+						<Title order={2}>Error</Title>
+						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
+							{error || "Test not found"}
+						</Alert>
+					</Stack>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 
 	if (!user) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Please sign in</h1>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Title order={2}>Please sign in</Title>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="mb-6">
-					<button
-						onClick={() => router.back()}
-						className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mb-4"
-					>
-						← Back
-					</button>
-					<div className="flex items-start justify-between gap-4">
-						<div className="flex-1">
-							<h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-								{test.title}
-							</h1>
-							{test.description && (
-								<p className="text-gray-600 dark:text-gray-400 mt-2">
-									{test.description}
-								</p>
-							)}
-						</div>
-						<ShareButtons testId={testId} testTitle={test.title} />
-					</div>
-				</div>
+		<Container size="xl" py="xl">
+			<Stack gap="lg">
+				<Button variant="subtle" onClick={() => router.back()} leftSection={<IconArrowLeft size={16} />}>
+					Back
+				</Button>
+				<Group justify="space-between" align="flex-start">
+					<Stack gap="xs">
+						<Title order={1}>{test.title}</Title>
+						{test.description && <Text c="dimmed">{test.description}</Text>}
+					</Stack>
+					<ShareButtons testId={testId} testTitle={test.title} />
+				</Group>
 
-				<TestBuilder
-					testId={testId}
-					initialQuestions={questions}
-					onSave={handleSave}
-				/>
-			</div>
-		</div>
+				<TestBuilder testId={testId} initialQuestions={questions} onSave={handleSave} />
+			</Stack>
+		</Container>
 	)
 }

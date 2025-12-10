@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { getTest, submitTest } from "@/lib/actions"
+import { getSession } from "@/lib/actions/auth"
+import { getTest, submitTest } from "@/lib/actions/tests"
 import { TestRunner } from "@/components/TestRunner"
-import { Card } from "@/components/ui/Card"
+import { Container, Card, Title, Stack, Loader, Alert } from "@mantine/core"
+import { IconAlertCircle } from "@tabler/icons-react"
 import type { Tables } from "@/types/supabase"
 
 type Question = Tables<"questions"> & {
@@ -15,11 +16,12 @@ type Question = Tables<"questions"> & {
 type Test = Tables<"tests">
 
 export default function TakeTestPage() {
-	const params = useParams()
-	const testId = params.id as string
+	const params = useParams<{ id: string }>()
+	const testId = params.id
 
 	const [test, setTest] = useState<Test | null>(null)
 	const [questions, setQuestions] = useState<Question[]>([])
+	const [authorProfile, setAuthorProfile] = useState<{ name: string | null; surname: string | null } | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -33,17 +35,16 @@ export default function TakeTestPage() {
 				}
 
 				setTest(result.test)
+				setAuthorProfile(result.authorProfile || null)
 				// Filter out correct answers for the test taker
-				const questionsWithoutCorrectAnswers = (result.questions || []).map(
-					(q: Question) => ({
-						...q,
-						answers: q.answers?.map(a => {
-							const answer = { ...a }
-							delete (answer as { is_correct?: boolean | null }).is_correct
-							return answer
-						}),
+				const questionsWithoutCorrectAnswers = (result.questions || []).map((q: Question) => ({
+					...q,
+					answers: q.answers?.map(a => {
+						const answer = { ...a }
+						delete (answer as { is_correct?: boolean | null }).is_correct
+						return answer
 					}),
-				) as Question[]
+				}))
 				setQuestions(questionsWithoutCorrectAnswers)
 			} catch (err) {
 				console.error("Error fetching test:", err)
@@ -57,10 +58,8 @@ export default function TakeTestPage() {
 	}, [testId])
 
 	const handleSubmit = async (answers: Record<string, string>) => {
-		const {
-			data: { session },
-		} = await supabase.auth.getSession()
-		const userId = session?.user?.id || null
+		const { user } = await getSession()
+		const userId = user?.id || null
 
 		const result = await submitTest(testId, answers, userId)
 
@@ -73,30 +72,36 @@ export default function TakeTestPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="text-gray-600 dark:text-gray-400">Loading...</div>
-			</div>
+			<Container
+				size="xl"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Loader />
+			</Container>
 		)
 	}
 
 	if (error || !test) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Error</h1>
-					<p className="text-gray-600 dark:text-gray-400">
-						{error || "Test not found"}
-					</p>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="md">
+						<Title order={2}>Error</Title>
+						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
+							{error || "Test not found"}
+						</Alert>
+					</Stack>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-				<TestRunner test={test} questions={questions} onSubmit={handleSubmit} />
-			</div>
-		</div>
+		<Container size="xl" py="xl">
+			<TestRunner test={test} questions={questions} onSubmit={handleSubmit} authorProfile={authorProfile} />
+		</Container>
 	)
 }

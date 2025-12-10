@@ -2,36 +2,46 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createTest } from "@/lib/actions"
-import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { createTest } from "@/lib/actions/tests"
+import { Card, Title, TextInput, Textarea, Button, Stack, Alert, Group, Container } from "@mantine/core"
+import { IconAlertCircle, IconX } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
 
 type CreateTestFormProps = {
 	user: User
 }
 
+const createTestSchema = z.object({
+	title: z.string().min(1, "Test title is required").trim(),
+	description: z.string().optional(),
+})
+
+type CreateTestFormData = z.infer<typeof createTestSchema>
+
 export function CreateTestForm({ user }: CreateTestFormProps) {
 	const router = useRouter()
-	const [submitting, setSubmitting] = useState(false)
-	const [formData, setFormData] = useState({
-		title: "",
-		description: "",
-	})
 	const [error, setError] = useState<string | null>(null)
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useForm<CreateTestFormData>({
+		resolver: zodResolver(createTestSchema),
+		defaultValues: {
+			title: "",
+			description: "",
+		},
+	})
+
+	const onSubmit = async (data: CreateTestFormData) => {
 		setError(null)
-		setSubmitting(true)
 
 		try {
-			const result = await createTest(
-				formData.title,
-				formData.description || null,
-				user.id,
-			)
+			const result = await createTest(data.title, data.description || null, user.id)
 
 			if (!result.success || !result.test) {
 				throw new Error(result.error || "Failed to create test")
@@ -41,77 +51,51 @@ export function CreateTestForm({ user }: CreateTestFormProps) {
 		} catch (err) {
 			console.error("Error creating test:", err)
 			setError(err instanceof Error ? err.message : "Failed to create test")
-		} finally {
-			setSubmitting(false)
 		}
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-			<div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-				<Card>
-					<h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-						Create New Test
-					</h1>
+		<Container size="md" py="xl">
+			<Card shadow="sm" padding="lg" radius="md" withBorder>
+				<Stack gap="lg">
+					<Title order={1}>Create New Test</Title>
 
-					<form onSubmit={handleSubmit} className="space-y-6">
-						<Input
-							label="Test Title"
-							value={formData.title}
-							onChange={e =>
-								setFormData({ ...formData, title: e.target.value })
-							}
-							required
-							placeholder="Enter test title"
-						/>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<Stack gap="md">
+							<TextInput
+								label="Test Title"
+								{...register("title")}
+								error={errors.title?.message}
+								required
+								placeholder="Enter test title"
+							/>
 
-						<div>
-							<label
-								htmlFor="description"
-								className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-							>
-								Description (optional)
-							</label>
-							<textarea
-								id="description"
-								value={formData.description}
-								onChange={e =>
-									setFormData({ ...formData, description: e.target.value })
-								}
+							<Textarea
+								label="Description (optional)"
+								{...register("description")}
+								error={errors.description?.message}
 								placeholder="Enter test description"
 								rows={4}
-								className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
 							/>
-						</div>
 
-						{error && (
-							<div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-								<p className="text-sm text-red-600 dark:text-red-400">
+							{error && (
+								<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
 									{error}
-								</p>
-							</div>
-						)}
+								</Alert>
+							)}
 
-						<div className="flex gap-3">
-							<Button
-								type="submit"
-								variant="primary"
-								disabled={submitting || !formData.title.trim()}
-							>
-								{submitting ? "Creating..." : "Create Test"}
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => router.back()}
-							>
-								Cancel
-							</Button>
-						</div>
+							<Group justify="flex-end">
+								<Button type="button" variant="outline" onClick={() => router.back()} leftSection={<IconX size={16} />}>
+									Cancel
+								</Button>
+								<Button type="submit" disabled={isSubmitting} loading={isSubmitting}>
+									Create Test
+								</Button>
+							</Group>
+						</Stack>
 					</form>
-				</Card>
-			</div>
-		</div>
+				</Stack>
+			</Card>
+		</Container>
 	)
 }
-

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/Button"
+import { Button, Group, Title, Stack, Paper, Text } from "@mantine/core"
+import { IconPlus, IconDeviceFloppy } from "@tabler/icons-react"
 import { QuestionEditor } from "./QuestionEditor"
 import type { Tables, TablesInsert } from "@/types/supabase"
 
@@ -15,11 +16,7 @@ interface TestBuilderProps {
 	onSave: (questions: Question[]) => Promise<void>
 }
 
-export function TestBuilder({
-	testId,
-	initialQuestions = [],
-	onSave,
-}: TestBuilderProps) {
+export function TestBuilder({ testId, initialQuestions = [], onSave }: TestBuilderProps) {
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 	const [saving, setSaving] = useState(false)
 
@@ -53,43 +50,46 @@ export function TestBuilder({
 	}
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-					Test Builder
-				</h2>
-				<div className="flex gap-3">
-					<Button variant="outline" onClick={handleAddQuestion}>
+		<Stack gap="lg">
+			<Group justify="space-between">
+				<Title order={2}>Test Builder</Title>
+				<Group gap="sm">
+					<Button variant="outline" onClick={handleAddQuestion} leftSection={<IconPlus size={16} />}>
 						Add Question
 					</Button>
-					<Button variant="primary" onClick={handleSave} disabled={saving}>
-						{saving ? "Saving..." : "Save Test"}
+					<Button onClick={handleSave} disabled={saving} loading={saving} leftSection={<IconDeviceFloppy size={16} />}>
+						Save Test
 					</Button>
-				</div>
-			</div>
+				</Group>
+			</Group>
 
-			<div className="space-y-4">
+			<Stack gap="md">
 				{questions.map((question, index) => (
 					<QuestionEditor
 						key={question.id ?? index}
 						question={question}
-						onUpdate={updatedQuestion =>
-							handleUpdateQuestion(index, updatedQuestion)
-						}
+						onUpdate={updatedQuestion => handleUpdateQuestion(index, updatedQuestion)}
 						onDelete={() => handleDeleteQuestion(index)}
 					/>
 				))}
 				{questions.length === 0 && (
-					<div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-						<p className="text-gray-500 dark:text-gray-400 mb-4">
-							No questions yet. Click "Add Question" to get started.
-						</p>
-						<Button variant="primary" onClick={handleAddQuestion}>
-							Add First Question
-						</Button>
-					</div>
+					<Paper
+						p="xl"
+						withBorder
+						style={{
+							borderStyle: "dashed",
+							textAlign: "center",
+						}}
+					>
+						<Stack gap="md" align="center">
+							<Text c="dimmed">No questions yet. Click "Add Question" to get started.</Text>
+							<Button onClick={handleAddQuestion} leftSection={<IconPlus size={16} />}>
+								Add First Question
+							</Button>
+						</Stack>
+					</Paper>
 				)}
-			</div>
-		</div>
+			</Stack>
+		</Stack>
 	)
 }

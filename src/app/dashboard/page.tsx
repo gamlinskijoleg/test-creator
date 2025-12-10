@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
-import { getUserTests } from "@/lib/actions"
-import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
+import { getSession } from "@/lib/actions/auth"
+import { getUserTestsPaginated } from "@/lib/actions/user"
+import { Container, Title, Button, Card, Text, Grid, GridCol, Stack, Group, Loader } from "@mantine/core"
+import { IconPlus, IconEdit, IconPlayerPlay } from "@tabler/icons-react"
 import { ShareButtons } from "@/components/ShareButtons"
 import type { Tables } from "@/types/supabase"
 import type { User } from "@supabase/supabase-js"
@@ -16,109 +16,198 @@ export default function DashboardPage() {
 	const [user, setUser] = useState<User | null>(null)
 	const [tests, setTests] = useState<Test[]>([])
 	const [loading, setLoading] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
+	const [hasMore, setHasMore] = useState(true)
+	const [page, setPage] = useState(1)
+	const observerTarget = useRef<HTMLDivElement>(null)
+	const isLoadingRef = useRef(false)
+
+	const fetchTests = useCallback(async (userId: string, pageNum: number, append: boolean = false) => {
+		if (isLoadingRef.current) return
+
+		try {
+			isLoadingRef.current = true
+			setLoadingMore(true)
+			const result = await getUserTestsPaginated(userId, pageNum)
+
+			if (result.success) {
+				if (append) {
+					setTests(prev => [...prev, ...result.tests])
+				} else {
+					setTests(result.tests)
+					setPage(1)
+				}
+				setHasMore(result.hasMore)
+			} else {
+				console.error("Failed to fetch tests:", result.error)
+			}
+		} catch (error) {
+			console.error("Error fetching tests:", error)
+		} finally {
+			setLoadingMore(false)
+			isLoadingRef.current = false
+		}
+	}, [])
 
 	useEffect(() => {
+		let mounted = true
+
 		const fetchUserAndTests = async () => {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession()
-			setUser(session?.user ?? null)
+			const { user } = await getSession()
+			if (!mounted) return
 
-			if (session?.user) {
-				try {
-					const result = await getUserTests(session.user.id)
+			setUser(user)
 
-					if (result.success) {
-						setTests(result.tests)
-					} else {
-						console.error("Failed to fetch tests:", result.error)
-					}
-				} catch (error) {
-					console.error("Error fetching tests:", error)
-				}
+			if (user) {
+				await fetchTests(user.id, 1, false)
 			}
-			setLoading(false)
+			if (mounted) {
+				setLoading(false)
+			}
 		}
 
 		fetchUserAndTests()
+
+		return () => {
+			mounted = false
+		}
 	}, [])
+
+	useEffect(() => {
+		if (!user || !hasMore || loadingMore || loading) return
+
+		const observer = new IntersectionObserver(
+			entries => {
+				if (entries[0].isIntersecting && hasMore && !loadingMore && !loading && !isLoadingRef.current && user) {
+					setPage(prevPage => {
+						const nextPage = prevPage + 1
+						fetchTests(user.id, nextPage, true)
+						return nextPage
+					})
+				}
+			},
+			{ threshold: 0.1 },
+		)
+
+		const currentTarget = observerTarget.current
+		if (currentTarget) {
+			observer.observe(currentTarget)
+		}
+
+		return () => {
+			if (currentTarget) {
+				observer.unobserve(currentTarget)
+			}
+		}
+	}, [hasMore, loadingMore, loading, user, fetchTests])
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="text-gray-600 dark:text-gray-400">Loading...</div>
-			</div>
+			<Container
+				size="xl"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Loader />
+			</Container>
 		)
 	}
 
 	if (!user) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Please sign in</h1>
-					<Link href="/auth">
-						<Button variant="primary">Sign In</Button>
-					</Link>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="md" align="center">
+						<Title order={2}>Please sign in</Title>
+						<Button component={Link} href="/auth">
+							Sign In
+						</Button>
+					</Stack>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between mb-8">
-					<h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-						My Tests
-					</h1>
-					<Link href="/create">
-						<Button variant="primary">Create New Test</Button>
-					</Link>
-				</div>
+		<Container size="xl" py="xl">
+			<Stack gap="lg">
+				<Group justify="space-between">
+					<Title order={1}>My Tests</Title>
+					<Button component={Link} href="/create" leftSection={<IconPlus size={16} />}>
+						Create New Test
+					</Button>
+				</Group>
 
-				{tests.length === 0 ? (
-					<Card>
-						<div className="text-center py-12">
-							<p className="text-gray-500 dark:text-gray-400 mb-4">
+				{tests.length === 0 && !loadingMore ? (
+					<Card shadow="sm" padding="xl" radius="md" withBorder>
+						<Stack gap="md" align="center">
+							<Text c="dimmed" ta="center">
 								You haven't created any tests yet.
-							</p>
-							<Link href="/create">
-								<Button variant="primary">Create Your First Test</Button>
-							</Link>
-						</div>
+							</Text>
+							<Button component={Link} href="/create" leftSection={<IconPlus size={16} />}>
+								Create Your First Test
+							</Button>
+						</Stack>
 					</Card>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{tests.map(test => (
-							<Card key={test.id} className="hover:shadow-lg transition-shadow">
-								<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-									{test.title}
-								</h3>
-								{test.description && (
-									<p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-										{test.description}
-									</p>
+					<>
+						<Grid>
+							{tests.map(test => (
+								<GridCol key={test.id} span={{ base: 12, md: 6, lg: 4 }}>
+									<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+										<Stack gap="md" justify="space-between" h="100%">
+											<Stack gap="xs">
+												<Title order={3}>{test.title}</Title>
+												{test.description && (
+													<Text c="dimmed" lineClamp={2}>
+														{test.description}
+													</Text>
+												)}
+											</Stack>
+											<Stack gap="xs">
+												<Group gap="xs">
+													<Button
+														component={Link}
+														href={`/create/${test.id}`}
+														variant="outline"
+														style={{ flex: 1 }}
+														leftSection={<IconEdit size={16} />}
+													>
+														Edit
+													</Button>
+													<Button
+														component={Link}
+														href={`/test/${test.id}`}
+														style={{ flex: 1 }}
+														leftSection={<IconPlayerPlay size={16} />}
+													>
+														Take Test
+													</Button>
+												</Group>
+												<ShareButtons testId={test.id} testTitle={test.title} />
+											</Stack>
+										</Stack>
+									</Card>
+								</GridCol>
+							))}
+						</Grid>
+						{hasMore && (
+							<div ref={observerTarget} style={{ height: "20px", marginTop: "20px" }}>
+								{loadingMore && (
+									<Stack align="center" gap="md" py="xl">
+										<Loader size="sm" />
+										<Text size="sm" c="dimmed">
+											Loading more tests...
+										</Text>
+									</Stack>
 								)}
-								<div className="space-y-2">
-									<div className="flex gap-2">
-										<Link href={`/create/${test.id}`} className="flex-1">
-											<Button variant="outline" className="w-full">
-												Edit
-											</Button>
-										</Link>
-										<Link href={`/test/${test.id}`} className="flex-1">
-											<Button variant="primary" className="w-full">
-												Take Test
-											</Button>
-										</Link>
-									</div>
-									<ShareButtons testId={test.id} testTitle={test.title} />
-								</div>
-							</Card>
-						))}
-					</div>
+							</div>
+						)}
+					</>
 				)}
-			</div>
-		</div>
+			</Stack>
+		</Container>
 	)
 }

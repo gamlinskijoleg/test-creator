@@ -1,19 +1,51 @@
 {
-  "name": "test-creator",
+  "name": "testy",
   "version": "0.1.0",
   "private": true,
+  "description": "Testy - Create & Take Interactive Tests. Build interactive quizzes and tests with ease. Share them with others and track results in real-time.",
+  "keywords": [
+    "test creator",
+    "quiz maker",
+    "online tests",
+    "interactive quizzes",
+    "test builder",
+    "assessment tool",
+    "quiz platform",
+    "test sharing",
+    "online assessment",
+    "test results",
+    "quiz generator",
+    "testy"
+  ],
+  "author": "Testy",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "dbreset": "ts-node scripts/dbreset.ts",
+    "seed": "ts-node scripts/seed.ts",
+    "typecheck": "tsc --noEmit",
+    "supabasegen": "supabase gen types typescript --project-id fkyplgvnwpsxtuthwemf > src/types/supabase.ts && npm run format"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@mantine/core": "^8.3.10",
+    "@mantine/dates": "^8.3.10",
+    "@mantine/form": "^8.3.10",
+    "@mantine/hooks": "^8.3.10",
+    "@mantine/tiptap": "^8.3.10",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
+    "@tabler/icons-react": "^3.35.0",
+    "dotenv": "^17.2.3",
     "next": "16.0.8",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "react-hook-form": "^7.68.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
@@ -24,6 +56,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "supabase": "^2.65.7",
     "tailwindcss": "^4",
+    "to-ico": "^1.1.5",
     "typescript": "^5"
   }
 }

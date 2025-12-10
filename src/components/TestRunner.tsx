@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/Button"
-import { Card } from "./ui/Card"
+import { Button, Card, Title, Text, Stack, Radio, Group, Alert, Container } from "@mantine/core"
+import { IconAlertCircle, IconSend } from "@tabler/icons-react"
 import type { Tables } from "@/types/supabase"
 
 type Question = Tables<"questions"> & {
@@ -17,12 +17,11 @@ interface TestRunnerProps {
 	}
 	questions: Question[]
 	onSubmit: (answers: Record<string, string>) => Promise<{ resultId: string }>
+	authorProfile?: { name: string | null; surname: string | null } | null
 }
 
-export function TestRunner({ test, questions, onSubmit }: TestRunnerProps) {
-	const [selectedAnswers, setSelectedAnswers] = useState<
-		Record<string, string>
-	>({})
+export function TestRunner({ test, questions, onSubmit, authorProfile }: TestRunnerProps) {
+	const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
 	const [submitting, setSubmitting] = useState(false)
 
 	const handleAnswerSelect = (questionId: string, answerId: string) => {
@@ -42,70 +41,71 @@ export function TestRunner({ test, questions, onSubmit }: TestRunnerProps) {
 		}
 	}
 
-	const allQuestionsAnswered = questions.every(
-		q => selectedAnswers[q.id] !== undefined,
-	)
+	const allQuestionsAnswered = questions.every(q => selectedAnswers[q.id] !== undefined)
 
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
-			<Card>
-				<h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-					{test.title}
-				</h1>
-				{test.description && (
-					<p className="text-gray-600 dark:text-gray-300">{test.description}</p>
+		<Container size="md">
+			<Stack gap="lg">
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="xs">
+						<Title order={1}>{test.title}</Title>
+						{test.description && <Text c="dimmed">{test.description}</Text>}
+					</Stack>
+				</Card>
+
+				<Stack gap="lg">
+					{questions.map((question, index) => {
+						const authorName = authorProfile?.name
+							? `${authorProfile.name}${authorProfile.surname ? ` ${authorProfile.surname}` : ""}`
+							: null
+
+						return (
+							<Card key={question.id} shadow="sm" padding="lg" radius="md" withBorder>
+								<Stack gap="md">
+									<Group justify="space-between" align="flex-start">
+										<Title order={3} style={{ flex: 1 }}>
+											Question {index + 1}: {question.question_text}
+										</Title>
+										{authorName && (
+											<Text size="sm" c="dimmed" style={{ whiteSpace: "nowrap", marginLeft: "1rem" }}>
+												by {authorName}
+											</Text>
+										)}
+									</Group>
+									<Radio.Group
+										value={selectedAnswers[question.id] || ""}
+										onChange={value => handleAnswerSelect(question.id, value)}
+									>
+										<Stack gap="xs">
+											{question.answers?.map(answer => (
+												<Radio key={answer.id} value={answer.id} label={answer.answer_text} />
+											))}
+										</Stack>
+									</Radio.Group>
+								</Stack>
+							</Card>
+						)
+					})}
+				</Stack>
+
+				<Group justify="flex-end">
+					<Button
+						onClick={handleSubmit}
+						disabled={!allQuestionsAnswered || submitting}
+						loading={submitting}
+						leftSection={<IconSend size={16} />}
+						size="lg"
+					>
+						Submit Test
+					</Button>
+				</Group>
+
+				{!allQuestionsAnswered && (
+					<Alert icon={<IconAlertCircle size={16} />} title="Incomplete Test" color="yellow">
+						Please answer all questions before submitting.
+					</Alert>
 				)}
-			</Card>
-
-			<div className="space-y-6">
-				{questions.map((question, index) => (
-					<Card key={question.id}>
-						<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-							Question {index + 1}: {question.question_text}
-						</h3>
-						<div className="space-y-2">
-							{question.answers?.map(answer => (
-								<label
-									key={answer.id}
-									className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-										selectedAnswers[question.id] === answer.id
-											? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-											: "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-									}`}
-								>
-									<input
-										type="radio"
-										name={`question-${question.id}`}
-										value={answer.id}
-										checked={selectedAnswers[question.id] === answer.id}
-										onChange={() => handleAnswerSelect(question.id, answer.id)}
-										className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500"
-									/>
-									<span className="text-gray-700 dark:text-gray-300">
-										{answer.answer_text}
-									</span>
-								</label>
-							))}
-						</div>
-					</Card>
-				))}
-			</div>
-
-			<div className="flex justify-end">
-				<Button
-					variant="primary"
-					onClick={handleSubmit}
-					disabled={!allQuestionsAnswered || submitting}
-				>
-					{submitting ? "Submitting..." : "Submit Test"}
-				</Button>
-			</div>
-
-			{!allQuestionsAnswered && (
-				<p className="text-sm text-amber-600 dark:text-amber-400 text-center">
-					Please answer all questions before submitting.
-				</p>
-			)}
-		</div>
+			</Stack>
+		</Container>
 	)
 }

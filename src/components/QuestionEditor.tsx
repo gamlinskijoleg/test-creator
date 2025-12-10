@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/Button"
-import { Input } from "./ui/Input"
+import { Button, TextInput, Card, Stack, Group, Title, Text } from "@mantine/core"
+import { IconTrash, IconPlus } from "@tabler/icons-react"
 import { AnswerEditor } from "./AnswerEditor"
 import type { Tables, TablesInsert } from "@/types/supabase"
 
@@ -16,14 +16,8 @@ interface QuestionEditorProps {
 	onDelete: () => void
 }
 
-export function QuestionEditor({
-	question,
-	onUpdate,
-	onDelete,
-}: QuestionEditorProps) {
-	const [answers, setAnswers] = useState<Tables<"answers">[]>(
-		question.answers ?? [],
-	)
+export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
+	const [answers, setAnswers] = useState<Tables<"answers">[]>(question.answers ?? [])
 
 	const handleAddAnswer = () => {
 		const newAnswer: TablesInsert<"answers"> = {
@@ -50,45 +44,42 @@ export function QuestionEditor({
 	}
 
 	return (
-		<div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-800">
-			<div className="flex items-start justify-between gap-4">
-				<div className="flex-1">
-					<Input
+		<Card shadow="sm" padding="lg" radius="md" withBorder>
+			<Stack gap="md">
+				<Group justify="space-between" align="flex-start" wrap="nowrap">
+					<TextInput
 						value={question.question_text}
-						onChange={e =>
-							onUpdate({ ...question, question_text: e.target.value })
-						}
+						onChange={e => onUpdate({ ...question, question_text: e.target.value })}
 						placeholder="Question text"
+						style={{ flex: 1 }}
 					/>
-				</div>
-				<Button variant="danger" onClick={onDelete}>
-					Delete Question
-				</Button>
-			</div>
-
-			<div className="space-y-3">
-				<div className="flex items-center justify-between">
-					<h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-						Answers
-					</h4>
-					<Button variant="outline" onClick={handleAddAnswer}>
-						Add Answer
+					<Button variant="light" color="red" onClick={onDelete} leftSection={<IconTrash size={16} />}>
+						Delete Question
 					</Button>
-				</div>
-				{answers.map((answer, index) => (
-					<AnswerEditor
-						key={answer.id ?? index}
-						answer={answer}
-						onUpdate={updatedAnswer => handleUpdateAnswer(index, updatedAnswer)}
-						onDelete={() => handleDeleteAnswer(index)}
-					/>
-				))}
-				{answers.length === 0 && (
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						No answers yet. Click "Add Answer" to add one.
-					</p>
-				)}
-			</div>
-		</div>
+				</Group>
+
+				<Stack gap="sm">
+					<Group justify="space-between">
+						<Title order={5}>Answers</Title>
+						<Button variant="outline" onClick={handleAddAnswer} leftSection={<IconPlus size={16} />}>
+							Add Answer
+						</Button>
+					</Group>
+					{answers.map((answer, index) => (
+						<AnswerEditor
+							key={answer.id ?? index}
+							answer={answer}
+							onUpdate={updatedAnswer => handleUpdateAnswer(index, updatedAnswer)}
+							onDelete={() => handleDeleteAnswer(index)}
+						/>
+					))}
+					{answers.length === 0 && (
+						<Text size="sm" c="dimmed">
+							No answers yet. Click "Add Answer" to add one.
+						</Text>
+					)}
+				</Stack>
+			</Stack>
+		</Card>
 	)
 }

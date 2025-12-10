@@ -2,83 +2,105 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import { Button } from "./ui/Button"
+import { useRouter } from "next/navigation"
+import { getSession, signOut } from "@/lib/actions/auth"
+import { Group, Button, Text, Loader, Container, Box } from "@mantine/core"
+import { IconDashboard, IconPlus, IconLogout, IconLogin, IconSearch, IconUser } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
 
 export function Navbar() {
+	const router = useRouter()
 	const [user, setUser] = useState<User | null>(null)
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		// Get initial session
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setUser(session?.user ?? null)
+		const fetchUser = async () => {
+			const { user } = await getSession()
+			setUser(user)
 			setLoading(false)
-		})
+		}
 
-		// Listen for auth changes
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user ?? null)
-		})
+		fetchUser()
 
-		return () => subscription.unsubscribe()
+		// Poll for session changes periodically
+		const interval = setInterval(() => {
+			fetchUser()
+		}, 5000)
+
+		return () => clearInterval(interval)
 	}, [])
 
 	const handleSignOut = async () => {
-		await supabase.auth.signOut()
+		const result = await signOut()
+		if (result.success) {
+			setUser(null)
+			router.push("/")
+		}
 	}
 
 	return (
-		<nav className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex justify-between items-center h-16">
-					<div className="flex items-center space-x-8">
-						<Link
-							href="/"
-							className="text-xl font-bold text-gray-900 dark:text-white"
-						>
-							Test Creator
-						</Link>
-						{user && (
-							<>
-								<Link
-									href="/dashboard"
-									className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-								>
-									Dashboard
-								</Link>
-								<Link
-									href="/create"
-									className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-								>
-									Create Test
-								</Link>
-							</>
-						)}
-					</div>
-					<div className="flex items-center space-x-4">
+		<Box h="100%" style={{ display: "flex", alignItems: "center" }}>
+			<Container size="xl" style={{ width: "100%" }}>
+				<Group h="100%" justify="space-between" wrap="nowrap">
+					<Group gap="xl" wrap="nowrap">
+						<Text component={Link} href="/" fw={700} size="xl" c="blue" style={{ textDecoration: "none" }}>
+							Testy
+						</Text>
+						<Group gap="xs" visibleFrom="sm">
+							<Button component={Link} href="/tests" variant="subtle" leftSection={<IconSearch size={18} />} size="sm">
+								Explore Tests
+							</Button>
+							{user && (
+								<>
+									<Button
+										component={Link}
+										href="/dashboard"
+										variant="subtle"
+										leftSection={<IconDashboard size={18} />}
+										size="sm"
+									>
+										Dashboard
+									</Button>
+									<Button
+										component={Link}
+										href="/create"
+										variant="subtle"
+										leftSection={<IconPlus size={18} />}
+										size="sm"
+									>
+										Create Test
+									</Button>
+								</>
+							)}
+						</Group>
+					</Group>
+					<Group gap="md" wrap="nowrap">
 						{loading ? (
-							<div className="text-gray-500">Loading...</div>
+							<Loader size="sm" />
 						) : user ? (
 							<>
-								<span className="text-sm text-gray-600 dark:text-gray-300">
-									{user.email}
-								</span>
-								<Button variant="outline" onClick={handleSignOut}>
+								<Button
+									component={Link}
+									href="/account"
+									variant="subtle"
+									leftSection={<IconUser size={16} />}
+									size="sm"
+									visibleFrom="sm"
+								>
+									Account
+								</Button>
+								<Button variant="light" onClick={handleSignOut} leftSection={<IconLogout size={16} />} size="sm">
 									Sign Out
 								</Button>
 							</>
 						) : (
-							<Link href="/auth">
-								<Button variant="primary">Sign In</Button>
-							</Link>
+							<Button component={Link} href="/auth" leftSection={<IconLogin size={16} />} size="sm">
+								Sign In
+							</Button>
 						)}
-					</div>
-				</div>
-			</div>
-		</nav>
+					</Group>
+				</Group>
+			</Container>
+		</Box>
 	)
 }

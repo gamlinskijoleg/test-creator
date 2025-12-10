@@ -2,163 +2,174 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/Button"
-import { Card } from "@/components/ui/Card"
-import { DocumentIcon } from "@/components/icons/DocumentIcon"
-import { ChecklistIcon } from "@/components/icons/ChecklistIcon"
-import { UsersIcon } from "@/components/icons/UsersIcon"
+import { useRouter } from "next/navigation"
+import { getSession } from "@/lib/actions/auth"
+import { Container, Title, Text, Button, Group, Card, Stack, Grid, GridCol, Badge, Box } from "@mantine/core"
+import { IconFileText, IconChecklist, IconUsers, IconDashboard, IconPlus, IconLogin } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
 
 export default function Home() {
+	const router = useRouter()
 	const [user, setUser] = useState<User | null>(null)
 
 	useEffect(() => {
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setUser(session?.user ?? null)
-		})
+		const fetchUser = async () => {
+			const { user } = await getSession()
+			setUser(user)
+		}
 
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user ?? null)
-		})
+		fetchUser()
 
-		return () => subscription.unsubscribe()
+		// Poll for session changes periodically
+		const interval = setInterval(() => {
+			fetchUser()
+		}, 5000)
+
+		return () => clearInterval(interval)
 	}, [])
 
 	return (
-		<div className="min-h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+		<Box>
 			{/* Hero Section */}
-			<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-				<div className="text-center">
-					<h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+			<Container size="xl" py={80}>
+				<Stack align="center" gap="xl">
+					<Title order={1} size="3.5rem" ta="center" fw={900}>
 						Create & Take Tests
-						<span className="block text-blue-600 dark:text-blue-400">
+						<Text component="span" inherit c="blue" display="block" mt="xs">
 							Made Simple
-						</span>
-					</h1>
-					<p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-						Build interactive quizzes and tests with ease. Share them with
-						others and track results in real-time.
-					</p>
-					<div className="flex flex-col sm:flex-row gap-4 justify-center">
+						</Text>
+					</Title>
+					<Text size="xl" c="dimmed" maw={600} ta="center">
+						Build interactive quizzes and tests with ease. Share them with others and track results in real-time.
+					</Text>
+					<Group justify="center" gap="md">
 						{user ? (
 							<>
-								<Link href="/dashboard">
-									<Button variant="primary" className="text-lg px-8 py-3">
-										Go to Dashboard
-									</Button>
-								</Link>
-								<Link href="/create">
-									<Button variant="outline" className="text-lg px-8 py-3">
-										Create Test
-									</Button>
-								</Link>
+								<Button component={Link} href="/dashboard" size="lg" leftSection={<IconDashboard size={20} />}>
+									Go to Dashboard
+								</Button>
+								<Button
+									component={Link}
+									href="/create"
+									size="lg"
+									variant="outline"
+									leftSection={<IconPlus size={20} />}
+								>
+									Create Test
+								</Button>
 							</>
 						) : (
 							<>
-								<Link href="/auth">
-									<Button variant="primary" className="text-lg px-8 py-3">
-										Get Started
-									</Button>
-								</Link>
-								<Link href="/auth">
-									<Button variant="outline" className="text-lg px-8 py-3">
-										Sign In
-									</Button>
-								</Link>
+								<Button component={Link} href="/auth" size="lg" leftSection={<IconPlus size={20} />}>
+									Get Started
+								</Button>
+								<Button component={Link} href="/auth" size="lg" variant="outline" leftSection={<IconLogin size={20} />}>
+									Sign In
+								</Button>
 							</>
 						)}
-					</div>
-				</div>
-			</section>
+					</Group>
+				</Stack>
+			</Container>
 
 			{/* Features Section */}
-			<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-				<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+			<Container size="xl" py={60}>
+				<Title order={2} ta="center" mb={50} fw={700}>
 					Everything you need to create amazing tests
-				</h2>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-					<Card>
-						<div className="text-center">
-							<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-								<DocumentIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-								Easy Test Creation
-							</h3>
-							<p className="text-gray-600 dark:text-gray-400">
-								Create tests with multiple questions and answers. Add as many
-								questions as you need with ease.
-							</p>
-						</div>
-					</Card>
-
-					<Card>
-						<div className="text-center">
-							<div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-								<ChecklistIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-								Instant Results
-							</h3>
-							<p className="text-gray-600 dark:text-gray-400">
-								Get immediate feedback with detailed results showing correct and
-								incorrect answers.
-							</p>
-						</div>
-					</Card>
-
-					<Card>
-						<div className="text-center">
-							<div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-								<UsersIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-								Share & Collaborate
-							</h3>
-							<p className="text-gray-600 dark:text-gray-400">
-								Share your tests with anyone. Public links make it easy for
-								others to take your tests.
-							</p>
-						</div>
-					</Card>
-				</div>
-			</section>
+				</Title>
+				<Grid>
+					<GridCol span={{ base: 12, md: 4 }}>
+						<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+							<Stack align="center" gap="md">
+								<Box
+									w={64}
+									h={64}
+									bg="blue.1"
+									style={{ borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+								>
+									<IconFileText size={32} color="var(--mantine-color-blue-6)" />
+								</Box>
+								<Title order={3} fw={600}>
+									Easy Test Creation
+								</Title>
+								<Text c="dimmed" ta="center">
+									Create tests with multiple questions and answers. Add as many questions as you need with ease.
+								</Text>
+							</Stack>
+						</Card>
+					</GridCol>
+					<GridCol span={{ base: 12, md: 4 }}>
+						<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+							<Stack align="center" gap="md">
+								<Box
+									w={64}
+									h={64}
+									bg="green.1"
+									style={{ borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+								>
+									<IconChecklist size={32} color="var(--mantine-color-green-6)" />
+								</Box>
+								<Title order={3} fw={600}>
+									Instant Results
+								</Title>
+								<Text c="dimmed" ta="center">
+									Get immediate feedback with detailed results showing correct and incorrect answers.
+								</Text>
+							</Stack>
+						</Card>
+					</GridCol>
+					<GridCol span={{ base: 12, md: 4 }}>
+						<Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+							<Stack align="center" gap="md">
+								<Box
+									w={64}
+									h={64}
+									bg="violet.1"
+									style={{ borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+								>
+									<IconUsers size={32} color="var(--mantine-color-violet-6)" />
+								</Box>
+								<Title order={3} fw={600}>
+									Share & Collaborate
+								</Title>
+								<Text c="dimmed" ta="center">
+									Share your tests with anyone. Public links make it easy for others to take your tests.
+								</Text>
+							</Stack>
+						</Card>
+					</GridCol>
+				</Grid>
+			</Container>
 
 			{/* CTA Section */}
-			<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-				<Card className="bg-linear-to-r from-blue-600 to-purple-600 text-white border-0">
-					<div className="text-center py-8">
-						<h2 className="text-3xl font-bold mb-4">
+			<Container size="xl" py={60}>
+				<Card
+					shadow="lg"
+					padding="xl"
+					radius="md"
+					style={{
+						background: "linear-gradient(135deg, var(--mantine-color-blue-6) 0%, var(--mantine-color-violet-6) 100%)",
+					}}
+				>
+					<Stack align="center" gap="md">
+						<Title order={2} c="white" ta="center" fw={700}>
 							Ready to create your first test?
-						</h2>
-						<p className="text-xl mb-6 text-blue-100">
+						</Title>
+						<Text size="xl" c="blue.1" ta="center">
 							Join thousands of users creating amazing tests every day.
-						</p>
+						</Text>
 						{user ? (
-							<Link href="/create">
-								<Button
-									variant="secondary"
-									className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
-								>
-									Create Your Test
-								</Button>
-							</Link>
+							<Button component={Link} href="/create" size="lg" color="white" variant="filled" c="blue">
+								Create Your Test
+							</Button>
 						) : (
-							<Link href="/auth">
-								<Button
-									variant="secondary"
-									className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
-								>
-									Get Started Free
-								</Button>
-							</Link>
+							<Button component={Link} href="/auth" size="lg" color="white" variant="filled" c="blue">
+								Get Started Free
+							</Button>
 						)}
-					</div>
+					</Stack>
 				</Card>
-			</section>
-		</div>
+			</Container>
+		</Box>
 	)
 }

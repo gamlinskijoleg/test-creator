@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { getTestResult } from "@/lib/actions"
+import { getTestResult } from "@/lib/actions/tests"
 import { ResultsView } from "@/components/ResultsView"
-import { Card } from "@/components/ui/Card"
+import { Container, Card, Title, Stack, Loader, Alert } from "@mantine/core"
+import { IconAlertCircle } from "@tabler/icons-react"
 import type { Tables } from "@/types/supabase"
 
 type TestResult = Tables<"test_results"> & {
@@ -18,8 +19,8 @@ type TestResult = Tables<"test_results"> & {
 }
 
 export default function ResultsPage() {
-	const params = useParams()
-	const resultId = params.id as string
+	const params = useParams<{ id: string }>()
+	const resultId = params.id
 
 	const [result, setResult] = useState<TestResult | null>(null)
 	const [loading, setLoading] = useState(true)
@@ -48,30 +49,36 @@ export default function ResultsPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="text-gray-600 dark:text-gray-400">Loading...</div>
-			</div>
+			<Container
+				size="xl"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Loader />
+			</Container>
 		)
 	}
 
 	if (error || !result) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Error</h1>
-					<p className="text-gray-600 dark:text-gray-400">
-						{error || "Results not found"}
-					</p>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="md">
+						<Title order={2}>Error</Title>
+						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
+							{error || "Results not found"}
+						</Alert>
+					</Stack>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-				<ResultsView result={result} showCorrectAnswers={true} />
-			</div>
-		</div>
+		<Container size="xl" py="xl">
+			<ResultsView result={result} showCorrectAnswers={true} />
+		</Container>
 	)
 }

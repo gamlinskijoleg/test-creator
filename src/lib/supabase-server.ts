@@ -1,78 +1,57 @@
-import { createClient } from "@supabase/supabase-js"
-import { headers } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Get user session on server
-// Note: This is a simplified approach. For production, consider using @supabase/ssr
-export async function getServerSession() {
+// Create server-side Supabase client
+export async function createSupabaseServerClient() {
 	if (!supabaseUrl || !supabaseAnonKey) {
-		return null
+		throw new Error("Missing Supabase environment variables")
 	}
 
-	const headersList = await headers()
-	const cookieHeader = headersList.get("cookie") || ""
+	const cookieStore = await cookies()
 
-	// Extract Supabase session from cookies
-	// Supabase stores session in cookies with pattern: sb-<project-ref>-auth-token
-	const projectRef = supabaseUrl.split("//")[1]?.split(".")[0]
-	if (!projectRef) {
-		return null
-	}
-
-	const cookieName = `sb-${projectRef}-auth-token`
-	const cookieMatch = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`))
-
-	if (!cookieMatch) {
-		return null
-	}
-
-	try {
-		// Decode the session cookie (it's base64 encoded JSON)
-		const sessionData = JSON.parse(
-			Buffer.from(cookieMatch[1], "base64").toString("utf-8"),
-		)
-
-		if (!sessionData?.access_token) {
-			return null
-		}
-
-		// Create a client with the access token
-		const supabaseServer = createClient<Database>(
-			supabaseUrl,
-			supabaseAnonKey,
-			{
-				global: {
-					headers: {
-						Authorization: `Bearer ${sessionData.access_token}`,
-					},
-				},
+	return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+		cookies: {
+			getAll() {
+				return cookieStore.getAll()
 			},
-		)
+			setAll(cookiesToSet) {
+				try {
+					cookiesToSet.forEach(({ name, value, options }) => {
+						cookieStore.set(name, value, options)
+					})
+				} catch (error) {
+					console.error("Error setting cookies:", error)
+					// The `setAll` method was called from a Server Component.
+					// This can be ignored if you have middleware refreshing
+					// user sessions.
+				}
+			},
+		},
+	})
+}
 
-		// Verify the token and get user
+// Get user on server (using getUser() for security)
+export async function getServerSession() {
+	try {
+		const supabase = await createSupabaseServerClient()
 		const {
 			data: { user },
 			error,
-		} = await supabaseServer.auth.getUser(sessionData.access_token)
+		} = await supabase.auth.getUser()
 
-		if (error || !user) {
+		if (error) {
+			console.error("Error getting user:", error)
 			return null
 		}
 
-		// Return a session-like object
-		return {
-			access_token: sessionData.access_token,
-			refresh_token: sessionData.refresh_token,
-			user,
-			expires_at: sessionData.expires_at,
-			expires_in: sessionData.expires_in,
-			token_type: "bearer",
-		}
+		// Return session-like object for backward compatibility
+		return user ? { user } : null
 	} catch (error) {
-		console.error("Error parsing session cookie:", error)
+		console.error("Error creating Supabase client:", error)
 		return null
 	}
 }

@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private routes
+Disallow: /dashboard
+Disallow: /create
+Disallow: /auth
+
+# Allow public test pages
+Allow: /test/*
+Allow: /results/*
+
+Sitemap: https://testy.app/sitemap.xml
+

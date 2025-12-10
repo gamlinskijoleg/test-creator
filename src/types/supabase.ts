@@ -1,10 +1,4 @@
-export type Json =
-	| string
-	| number
-	| boolean
-	| null
-	| { [key: string]: Json | undefined }
-	| Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
 	// Allows to automatically instantiate createClient with right options
@@ -85,6 +79,42 @@ export type Database = {
 						referencedColumns: ["id"]
 					},
 				]
+			}
+			profiles: {
+				Row: {
+					birthdate: string | null
+					city: string | null
+					created_at: string | null
+					id: string
+					name: string | null
+					pronouns: string | null
+					surname: string | null
+					updated_at: string | null
+					user_id: string
+				}
+				Insert: {
+					birthdate?: string | null
+					city?: string | null
+					created_at?: string | null
+					id?: string
+					name?: string | null
+					pronouns?: string | null
+					surname?: string | null
+					updated_at?: string | null
+					user_id: string
+				}
+				Update: {
+					birthdate?: string | null
+					city?: string | null
+					created_at?: string | null
+					id?: string
+					name?: string | null
+					pronouns?: string | null
+					surname?: string | null
+					updated_at?: string | null
+					user_id?: string
+				}
+				Relationships: []
 			}
 			questions: {
 				Row: {
@@ -176,7 +206,7 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
-			[_ in never]: never
+			execute_sql: { Args: { sql: string }; Returns: undefined }
 		}
 		Enums: {
 			[_ in never]: never
@@ -210,10 +240,8 @@ export type Tables<
 		}
 		? R
 		: never
-	: DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-				DefaultSchema["Views"])
-		? (DefaultSchema["Tables"] &
-				DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+	: DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+		? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
 				Row: infer R
 			}
 			? R
@@ -221,9 +249,7 @@ export type Tables<
 		: never
 
 export type TablesInsert<
-	DefaultSchemaTableNameOrOptions extends
-		| keyof DefaultSchema["Tables"]
-		| { schema: keyof DatabaseWithoutInternals },
+	DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
 		schema: keyof DatabaseWithoutInternals
 	}
@@ -246,9 +272,7 @@ export type TablesInsert<
 		: never
 
 export type TablesUpdate<
-	DefaultSchemaTableNameOrOptions extends
-		| keyof DefaultSchema["Tables"]
-		| { schema: keyof DatabaseWithoutInternals },
+	DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
 		schema: keyof DatabaseWithoutInternals
 	}
@@ -271,9 +295,7 @@ export type TablesUpdate<
 		: never
 
 export type Enums<
-	DefaultSchemaEnumNameOrOptions extends
-		| keyof DefaultSchema["Enums"]
-		| { schema: keyof DatabaseWithoutInternals },
+	DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
 	EnumName extends DefaultSchemaEnumNameOrOptions extends {
 		schema: keyof DatabaseWithoutInternals
 	}

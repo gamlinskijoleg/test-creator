@@ -1,107 +1,129 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { signIn, signUp, getSession } from "@/lib/actions/auth"
+import {
+	Card,
+	Title,
+	Text,
+	TextInput,
+	PasswordInput,
+	Button,
+	Stack,
+	Alert,
+	Container,
+	Loader,
+	Anchor,
+} from "@mantine/core"
+import { IconAlertCircle, IconCheck } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
+
+const signInSchema = z.object({
+	email: z.string().email("Invalid email address"),
+	password: z.string().min(1, "Password is required"),
+})
+
+const signUpSchema = signInSchema
+	.extend({
+		name: z.string().min(1, "Name is required"),
+		confirmPassword: z.string().min(1, "Please confirm your password"),
+	})
+	.refine(data => data.password === data.confirmPassword, {
+		message: "Passwords do not match",
+		path: ["confirmPassword"],
+	})
+
+type SignInFormData = z.infer<typeof signInSchema>
+type SignUpFormData = z.infer<typeof signUpSchema>
 
 export default function AuthPage() {
 	const router = useRouter()
 	const [isSignUp, setIsSignUp] = useState(false)
 	const [user, setUser] = useState<User | null>(null)
 	const [loading, setLoading] = useState(true)
-	const [submitting, setSubmitting] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [message, setMessage] = useState<string | null>(null)
-	const [formData, setFormData] = useState({
-		email: "",
-		password: "",
-		confirmPassword: "",
+
+	const schema = useMemo(() => (isSignUp ? signUpSchema : signInSchema), [isSignUp])
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+		reset,
+	} = useForm<SignInFormData | SignUpFormData>({
+		resolver: zodResolver(schema),
+		defaultValues: {
+			email: "",
+			password: "",
+			...(isSignUp && { name: "", confirmPassword: "" }),
+		},
+		mode: "onBlur",
 	})
 
 	useEffect(() => {
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setUser(session?.user ?? null)
+		reset({
+			email: "",
+			password: "",
+			...(isSignUp && { name: "", confirmPassword: "" }),
+		})
+	}, [isSignUp, reset])
+
+	useEffect(() => {
+		getSession().then(({ user }) => {
+			setUser(user)
 			setLoading(false)
-			if (session?.user) {
+			if (user) {
 				router.push("/dashboard")
 			}
 		})
 	}, [router])
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
+	const onSubmit = async (data: SignInFormData | SignUpFormData) => {
 		setError(null)
 		setMessage(null)
-		setSubmitting(true)
 
 		if (isSignUp) {
-			if (formData.password !== formData.confirmPassword) {
-				setError("Passwords do not match")
-				setSubmitting(false)
-				return
-			}
+			const signUpData = data as SignUpFormData
+			const result = await signUp(signUpData.email, signUpData.password, signUpData.name)
 
-			if (formData.password.length < 6) {
-				setError("Password must be at least 6 characters")
-				setSubmitting(false)
-				return
-			}
-
-			try {
-				const { data, error: signUpError } = await supabase.auth.signUp({
-					email: formData.email,
-					password: formData.password,
-				})
-
-				if (signUpError) {
-					throw signUpError
-				}
-
-				if (data.user) {
-					setMessage(
-						"Account created successfully! Please check your email to verify your account.",
-					)
-					setFormData({ email: "", password: "", confirmPassword: "" })
-				}
-			} catch (err) {
-				console.error("Sign up error:", err)
-				setError(
-					err instanceof Error ? err.message : "Failed to create account",
-				)
+			if (!result.success) {
+				setError(result.error || "Failed to create account")
+			} else if (result.user) {
+				setMessage("Account created successfully! Please check your email to verify your account.")
+				reset()
 			}
 		} else {
-			try {
-				const { data, error: signInError } =
-					await supabase.auth.signInWithPassword({
-						email: formData.email,
-						password: formData.password,
-					})
+			const signInData = data
+			const result = await signIn(signInData.email, signInData.password)
 
-				if (signInError) {
-					throw signInError
-				}
-
-				if (data.user) {
-					router.push("/dashboard")
-				}
-			} catch (err) {
-				console.error("Sign in error:", err)
-				setError(err instanceof Error ? err.message : "Failed to sign in")
+			if (!result.success) {
+				setError(result.error || "Failed to sign in")
+			} else if (result.user) {
+				// Refresh the page to update session
+				router.refresh()
+				router.push("/dashboard")
 			}
 		}
-
-		setSubmitting(false)
 	}
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="text-gray-600 dark:text-gray-400">Loading...</div>
-			</div>
+			<Container
+				size="sm"
+				style={{
+					minHeight: "100vh",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+			>
+				<Loader />
+			</Container>
 		)
 	}
 
@@ -110,104 +132,92 @@ export default function AuthPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-			<div className="max-w-md w-full">
-				<Card>
-					<div className="text-center mb-8">
-						<h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+		<Container size="sm" py="xl">
+			<Card shadow="sm" padding="lg" radius="md" withBorder>
+				<Stack gap="lg">
+					<Stack gap="xs" align="center">
+						<Title order={1} ta="center">
 							{isSignUp ? "Create Account" : "Welcome Back"}
-						</h1>
-						<p className="text-gray-600 dark:text-gray-400">
-							{isSignUp
-								? "Sign up to start creating tests"
-								: "Sign in to your account"}
-						</p>
-					</div>
+						</Title>
+						<Text c="dimmed" ta="center">
+							{isSignUp ? "Sign up to start creating tests" : "Sign in to your account"}
+						</Text>
+					</Stack>
 
-					<form onSubmit={handleSubmit} className="space-y-6">
-						<Input
-							label="Email"
-							type="email"
-							value={formData.email}
-							onChange={e =>
-								setFormData({ ...formData, email: e.target.value })
-							}
-							required
-							placeholder="your@email.com"
-						/>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<Stack gap="md">
+							{isSignUp && (
+								<TextInput
+									label="Name"
+									{...register("name")}
+									error={(errors as Record<string, { message?: string }>).name?.message}
+									required
+									placeholder="Your name"
+								/>
+							)}
 
-						<Input
-							label="Password"
-							type="password"
-							value={formData.password}
-							onChange={e =>
-								setFormData({ ...formData, password: e.target.value })
-							}
-							required
-							placeholder="••••••••"
-						/>
+							<TextInput
+								label="Email"
+								type="email"
+								{...register("email")}
+								error={errors.email?.message}
+								required
+								placeholder="your@email.com"
+							/>
 
-						{isSignUp && (
-							<Input
-								label="Confirm Password"
-								type="password"
-								value={formData.confirmPassword}
-								onChange={e =>
-									setFormData({ ...formData, confirmPassword: e.target.value })
-								}
+							<PasswordInput
+								label="Password"
+								{...register("password")}
+								error={errors.password?.message}
 								required
 								placeholder="••••••••"
 							/>
-						)}
 
-						{error && (
-							<div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-								<p className="text-sm text-red-600 dark:text-red-400">
+							{isSignUp && (
+								<PasswordInput
+									label="Confirm Password"
+									{...register("confirmPassword")}
+									error={(errors as Record<string, { message?: string }>).confirmPassword?.message}
+									required
+									placeholder="••••••••"
+								/>
+							)}
+
+							{error && (
+								<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
 									{error}
-								</p>
-							</div>
-						)}
+								</Alert>
+							)}
 
-						{message && (
-							<div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-								<p className="text-sm text-green-600 dark:text-green-400">
+							{message && (
+								<Alert icon={<IconCheck size={16} />} title="Success" color="green">
 									{message}
-								</p>
-							</div>
-						)}
+								</Alert>
+							)}
 
-						<Button
-							type="submit"
-							variant="primary"
-							disabled={submitting}
-							className="w-full"
-						>
-							{submitting ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
-						</Button>
+							<Button type="submit" disabled={isSubmitting} loading={isSubmitting} fullWidth>
+								{isSignUp ? "Sign Up" : "Sign In"}
+							</Button>
+						</Stack>
 					</form>
 
-					<div className="mt-6 text-center">
-						<button
+					<Text ta="center" size="sm">
+						{isSignUp ? "Already have an account? " : "Don't have an account? "}
+						<Anchor
+							component="button"
 							type="button"
 							onClick={() => {
 								setIsSignUp(!isSignUp)
 								setError(null)
 								setMessage(null)
-								setFormData({
-									email: "",
-									password: "",
-									confirmPassword: "",
-								})
+								reset()
 							}}
-							className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
 						>
-							{isSignUp
-								? "Already have an account? Sign in"
-								: "Don't have an account? Sign up"}
-						</button>
-					</div>
-				</Card>
-			</div>
-		</div>
+							{isSignUp ? "Sign in" : "Sign up"}
+						</Anchor>
+					</Text>
+				</Stack>
+			</Card>
+		</Container>
 	)
 }

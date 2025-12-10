@@ -1,21 +1,27 @@
-import { getServerSession } from "@/lib/supabase-server"
+import { getSession } from "@/lib/actions/auth"
 import { CreateTestForm } from "@/components/CreateTestForm"
-import { Card } from "@/components/ui/Card"
+import { Card, Container, Title, Text, Stack, Button } from "@mantine/core"
+import Link from "next/link"
 
 export default async function CreateTestPage() {
-	const session = await getServerSession()
-	const user = session?.user ?? null
+	const { user } = await getSession()
 
 	if (!user) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Card>
-					<h1 className="text-2xl font-bold mb-4">Please sign in</h1>
-					<p className="text-gray-600 dark:text-gray-400 mb-4">
-						You need to be signed in to create a test.
-					</p>
+			<Container
+				size="sm"
+				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+			>
+				<Card shadow="sm" padding="lg" radius="md" withBorder>
+					<Stack gap="md">
+						<Title order={2}>Please sign in</Title>
+						<Text c="dimmed">You need to be signed in to create a test.</Text>
+						<Button component={Link} href="/auth">
+							Sign In
+						</Button>
+					</Stack>
 				</Card>
-			</div>
+			</Container>
 		)
 	}
 

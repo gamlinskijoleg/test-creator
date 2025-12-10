@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/Button"
+import { Button, Group } from "@mantine/core"
+import { IconShare, IconCopy, IconCheck } from "@tabler/icons-react"
 
 interface ShareButtonsProps {
 	testId: string
@@ -43,34 +44,19 @@ export function ShareButtons({ testId, testTitle }: ShareButtonsProps) {
 	const canShare = typeof navigator !== "undefined" && "share" in navigator
 
 	return (
-		<div className="flex items-center gap-2">
+		<Group gap="xs">
 			{canShare && (
-				<Button
-					variant="outline"
-					onClick={handleShare}
-					className="flex items-center gap-2"
-				>
-					<img
-						src="/icons/share.svg"
-						alt="Share"
-						className="w-4 h-4"
-					/>
+				<Button variant="outline" onClick={handleShare} leftSection={<IconShare size={16} />}>
 					Share
 				</Button>
 			)}
 			<Button
 				variant="outline"
 				onClick={handleCopy}
-				className="flex items-center gap-2"
+				leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
 			>
-				<img
-					src="/icons/copy.svg"
-					alt="Copy"
-					className="w-4 h-4"
-				/>
 				{copied ? "Copied!" : "Copy Link"}
 			</Button>
-		</div>
+		</Group>
 	)
 }
-

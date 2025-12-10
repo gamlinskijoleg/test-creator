@@ -1,6 +1,6 @@
 "use server"
 
-import { supabase } from "./supabase"
+import { createSupabaseServerClient } from "../supabase-server"
 import type { Tables } from "@/types/supabase"
 
 type Question = Tables<"questions"> & {
@@ -8,12 +8,9 @@ type Question = Tables<"questions"> & {
 }
 
 // Create a new test
-export async function createTest(
-	title: string,
-	description: string | null,
-	authorId: string,
-) {
+export async function createTest(title: string, description: string | null, authorId: string) {
 	try {
+		const supabase = await createSupabaseServerClient()
 		const { data: testData, error: supabaseError } = await supabase
 			.from("tests")
 			.insert({
@@ -49,11 +46,8 @@ export async function createTest(
 // Get test with questions and answers
 export async function getTest(testId: string) {
 	try {
-		const { data: test, error: testError } = await supabase
-			.from("tests")
-			.select("*")
-			.eq("id", testId)
-			.single()
+		const supabase = await createSupabaseServerClient()
+		const { data: test, error: testError } = await supabase.from("tests").select("*").eq("id", testId).single()
 
 		if (testError || !test) {
 			return {
@@ -61,7 +55,19 @@ export async function getTest(testId: string) {
 				error: testError?.message || "Test not found",
 				test: null,
 				questions: [],
+				authorProfile: null,
 			}
+		}
+
+		// Get author profile
+		let authorProfile = null
+		if (test.author_id) {
+			const { data: profile } = await supabase
+				.from("profiles")
+				.select("name, surname")
+				.eq("user_id", test.author_id)
+				.single()
+			authorProfile = profile
 		}
 
 		const { data: questions, error: questionsError } = await supabase
@@ -76,6 +82,7 @@ export async function getTest(testId: string) {
 				error: questionsError.message,
 				test,
 				questions: [],
+				authorProfile,
 			}
 		}
 
@@ -83,7 +90,8 @@ export async function getTest(testId: string) {
 			success: true,
 			error: null,
 			test,
-			questions: (questions || []) as Question[],
+			questions: questions || [],
+			authorProfile,
 		}
 	} catch (error) {
 		return {
@@ -91,6 +99,7 @@ export async function getTest(testId: string) {
 			error: error instanceof Error ? error.message : "Failed to fetch test",
 			test: null,
 			questions: [],
+			authorProfile: null,
 		}
 	}
 }
@@ -98,11 +107,9 @@ export async function getTest(testId: string) {
 // Save test questions and answers
 export async function saveTestQuestions(testId: string, questions: Question[]) {
 	try {
+		const supabase = await createSupabaseServerClient()
 		// Get existing questions
-		const { data: existingQuestions } = await supabase
-			.from("questions")
-			.select("id")
-			.eq("test_id", testId)
+		const { data: existingQuestions } = await supabase.from("questions").select("id").eq("test_id", testId)
 
 		// Delete existing answers and questions
 		if (existingQuestions && existingQuestions.length > 0) {
@@ -138,9 +145,7 @@ export async function saveTestQuestions(testId: string, questions: Question[]) {
 					question_id: newQuestion.id,
 				}))
 
-				const { error: aError } = await supabase
-					.from("answers")
-					.insert(answersToInsert)
+				const { error: aError } = await supabase.from("answers").insert(answersToInsert)
 
 				if (aError) {
 					return {
@@ -164,12 +169,9 @@ export async function saveTestQuestions(testId: string, questions: Question[]) {
 }
 
 // Submit test answers
-export async function submitTest(
-	testId: string,
-	answers: Record<string, string>,
-	userId: string | null,
-) {
+export async function submitTest(testId: string, answers: Record<string, string>, userId: string | null) {
 	try {
+		const supabase = await createSupabaseServerClient()
 		// Get test questions to calculate score
 		const { data: questions, error: questionsError } = await supabase
 			.from("questions")
@@ -195,9 +197,7 @@ export async function submitTest(
 			const selectedAnswerId = answers[question.id]
 			if (!selectedAnswerId) continue
 
-			const selectedAnswer = question.answers?.find(
-				a => a.id === selectedAnswerId,
-			)
+			const selectedAnswer = question.answers?.find(a => a.id === selectedAnswerId)
 			if (selectedAnswer?.is_correct) {
 				correctAnswers++
 			}
@@ -239,9 +239,7 @@ export async function submitTest(
 				answer_id: ga.answer_id,
 			}))
 
-			const { error: givenAnswersError } = await supabase
-				.from("given_answers")
-				.insert(givenAnswersToInsert)
+			const { error: givenAnswersError } = await supabase.from("given_answers").insert(givenAnswersToInsert)
 
 			if (givenAnswersError) {
 				console.error("Failed to save given answers:", givenAnswersError)
@@ -266,6 +264,7 @@ export async function submitTest(
 // Get test result with details
 export async function getTestResult(resultId: string) {
 	try {
+		const supabase = await createSupabaseServerClient()
 		const { data: result, error: resultError } = await supabase
 			.from("test_results")
 			.select("*, test:tests(*)")
@@ -307,37 +306,6 @@ export async function getTestResult(resultId: string) {
 			success: false,
 			error: error instanceof Error ? error.message : "Failed to fetch result",
 			result: null,
-		}
-	}
-}
-
-// Get user's tests
-export async function getUserTests(userId: string) {
-	try {
-		const { data: tests, error } = await supabase
-			.from("tests")
-			.select("*")
-			.eq("author_id", userId)
-			.order("created_at", { ascending: false })
-
-		if (error) {
-			return {
-				success: false,
-				error: error.message,
-				tests: [],
-			}
-		}
-
-		return {
-			success: true,
-			error: null,
-			tests: tests || [],
-		}
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to fetch tests",
-			tests: [],
 		}
 	}
 }
