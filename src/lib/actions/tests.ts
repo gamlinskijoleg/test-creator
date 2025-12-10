@@ -104,6 +104,100 @@ export async function getTest(testId: string) {
 	}
 }
 
+// Delete a test and all related data (questions, answers, results)
+export async function deleteTest(testId: string, userId: string) {
+	try {
+		const supabase = await createSupabaseServerClient()
+
+		// Ensure test exists and belongs to the current user
+		const { data: test, error: testError } = await supabase
+			.from("tests")
+			.select("id, author_id")
+			.eq("id", testId)
+			.single()
+
+		if (testError || !test) {
+			return {
+				success: false,
+				error: testError?.message || "Test not found",
+			}
+		}
+
+		if (test.author_id !== userId) {
+			return {
+				success: false,
+				error: "Unauthorized",
+			}
+		}
+
+		// Collect related question and result ids
+		const { data: questionRows, error: questionsError } = await supabase
+			.from("questions")
+			.select("id")
+			.eq("test_id", testId)
+		if (questionsError) {
+			return { success: false, error: questionsError.message }
+		}
+		const questionIds = (questionRows ?? []).map(q => q.id).filter(Boolean)
+
+		const { data: resultRows, error: resultsError } = await supabase
+			.from("test_results")
+			.select("id")
+			.eq("test_id", testId)
+		if (resultsError) {
+			return { success: false, error: resultsError.message }
+		}
+		const resultIds = (resultRows ?? []).map(r => r.id).filter(Boolean)
+
+		// Delete given answers tied to this test (by questions and by results)
+		if (questionIds.length > 0) {
+			const { error } = await supabase.from("given_answers").delete().in("question_id", questionIds)
+			if (error) {
+				return { success: false, error: error.message }
+			}
+		}
+
+		if (resultIds.length > 0) {
+			const { error } = await supabase.from("given_answers").delete().in("result_id", resultIds)
+			if (error) {
+				return { success: false, error: error.message }
+			}
+		}
+
+		// Delete answers and questions
+		if (questionIds.length > 0) {
+			const { error: answersError } = await supabase.from("answers").delete().in("question_id", questionIds)
+			if (answersError) {
+				return { success: false, error: answersError.message }
+			}
+
+			const { error: deleteQuestionsError } = await supabase.from("questions").delete().eq("test_id", testId)
+			if (deleteQuestionsError) {
+				return { success: false, error: deleteQuestionsError.message }
+			}
+		}
+
+		// Delete results
+		const { error: deleteResultsError } = await supabase.from("test_results").delete().eq("test_id", testId)
+		if (deleteResultsError) {
+			return { success: false, error: deleteResultsError.message }
+		}
+
+		// Finally delete the test itself
+		const { error: deleteTestError } = await supabase.from("tests").delete().eq("id", testId)
+		if (deleteTestError) {
+			return { success: false, error: deleteTestError.message }
+		}
+
+		return { success: true, error: null }
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to delete test",
+		}
+	}
+}
+
 // Save test questions and answers
 export async function saveTestQuestions(testId: string, questions: Question[]) {
 	try {

@@ -145,7 +145,11 @@
 		"error": "Error",
 		"notFound": "Test not found",
 		"saveSuccess": "Test saved successfully!",
-		"saveFailed": "Failed to save test. Please try again."
+		"saveFailed": "Failed to save test. Please try again.",
+		"delete": "Delete test",
+		"deleteConfirm": "Are you sure you want to delete “{{title}}”? This cannot be undone.",
+		"deleteSuccess": "Test deleted successfully.",
+		"deleteFailed": "Failed to delete test. Please try again."
 	},
 	"takeTest": {
 		"error": "Error",

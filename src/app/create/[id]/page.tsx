@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { getTest, saveTestQuestions } from "@/lib/actions/tests"
+import { deleteTest, getTest, saveTestQuestions } from "@/lib/actions/tests"
 import { useUser } from "@/lib/hooks/useUser"
 import { TestBuilder } from "@/components/TestBuilder"
 import { CopyLinkButton, ShareButton } from "@/components/ShareButtons"
 import { Container, Card, Title, Text, Stack, Group, Button, Loader, Alert } from "@mantine/core"
-import { IconArrowLeft, IconAlertCircle } from "@tabler/icons-react"
+import { IconArrowLeft, IconAlertCircle, IconTrash } from "@tabler/icons-react"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 import type { Tables } from "@/types/supabase"
 
@@ -27,6 +27,7 @@ export default function EditTestPage() {
 	const [questions, setQuestions] = useState<Question[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	const [deleting, setDeleting] = useState(false)
 
 	useEffect(() => {
 		if (!userLoading) {
@@ -75,6 +76,29 @@ export default function EditTestPage() {
 		}
 	}
 
+	const handleDelete = async () => {
+		if (!test || !user) return
+		const confirmed = confirm(t("editTest.deleteConfirm", { title: test.title }))
+		if (!confirmed) return
+
+		setDeleting(true)
+		try {
+			const result = await deleteTest(testId, user.id)
+
+			if (!result.success) {
+				throw new Error(result.error || t("editTest.deleteFailed"))
+			}
+
+			alert(t("editTest.deleteSuccess"))
+			router.push("/dashboard")
+		} catch (err) {
+			console.error("Error deleting test:", err)
+			alert(err instanceof Error ? err.message : t("editTest.deleteFailed"))
+		} finally {
+			setDeleting(false)
+		}
+	}
+
 	if (loading || userLoading) {
 		return (
 			<Container
@@ -120,6 +144,17 @@ export default function EditTestPage() {
 						{test.description && <Text c="dimmed">{test.description}</Text>}
 					</Stack>
 					<Group gap="xs">
+						{user?.id === test.author_id && (
+							<Button
+								color="red"
+								variant="light"
+								onClick={handleDelete}
+								loading={deleting}
+								leftSection={<IconTrash size={16} />}
+							>
+								{t("editTest.delete")}
+							</Button>
+						)}
 						<ShareButton testId={testId} testTitle={test.title} />
 						<CopyLinkButton testId={testId} />
 					</Group>
