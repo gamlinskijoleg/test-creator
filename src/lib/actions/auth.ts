@@ -15,11 +15,11 @@ export async function getSession() {
 		// Return null user instead of throwing
 		const errorMessage = error instanceof Error ? error.message : String(error)
 		if (
-			errorMessage.includes("User from sub claim in JWT does not exist") ||
-			errorMessage.includes("AuthApiError") ||
-			errorMessage.includes("AuthSessionMissingError") ||
-			errorMessage.includes("session") ||
-			errorMessage.includes("JWT")
+			errorMessage.includes("User from sub claim in JWT does not exist")
+			|| errorMessage.includes("AuthApiError")
+			|| errorMessage.includes("AuthSessionMissingError")
+			|| errorMessage.includes("session")
+			|| errorMessage.includes("JWT")
 		) {
 			return {
 				user: null,

@@ -77,10 +77,10 @@ export async function middleware(request: NextRequest) {
 		if (error || !session) {
 			const errorMessage = error?.message || ""
 			if (
-				errorMessage.includes("User from sub claim in JWT does not exist") ||
-				errorMessage.includes("JWT") ||
-				errorMessage.includes("invalid") ||
-				errorMessage.includes("session")
+				errorMessage.includes("User from sub claim in JWT does not exist")
+				|| errorMessage.includes("JWT")
+				|| errorMessage.includes("invalid")
+				|| errorMessage.includes("session")
 			) {
 				// Clear auth-related cookies
 				const supabaseDomain = supabaseUrl?.split("//")[1]?.split(".")[0]
@@ -93,10 +93,10 @@ export async function middleware(request: NextRequest) {
 		// Silently handle authentication errors in middleware
 		const errorMessage = error instanceof Error ? error.message : String(error)
 		if (
-			errorMessage.includes("User from sub claim in JWT does not exist") ||
-			errorMessage.includes("AuthApiError") ||
-			errorMessage.includes("AuthSessionMissingError") ||
-			errorMessage.includes("session")
+			errorMessage.includes("User from sub claim in JWT does not exist")
+			|| errorMessage.includes("AuthApiError")
+			|| errorMessage.includes("AuthSessionMissingError")
+			|| errorMessage.includes("session")
 		) {
 			// Clear potentially invalid cookies
 			const supabaseDomain = supabaseUrl?.split("//")[1]?.split(".")[0]
