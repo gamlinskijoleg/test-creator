@@ -11,9 +11,11 @@ import {
 	AppShellFooter,
 	createTheme,
 } from "@mantine/core"
+import { I18nProvider } from "@/components/I18nProvider"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { StructuredData } from "@/components/StructuredData"
+import { getI18nProps } from "@/i18n/server"
 import { defaultMetadata } from "@/lib/metadata"
 
 const geistSans = Geist({
@@ -51,31 +53,35 @@ const theme = createTheme({
 	},
 })
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
+	const { locale, resources } = await getI18nProps()
+
 	return (
-		<html lang="en" suppressHydrationWarning data-mantine-color-scheme="dark">
+		<html lang={locale} suppressHydrationWarning data-mantine-color-scheme="dark">
 			<head>
 				<ColorSchemeScript defaultColorScheme="dark" />
 				<StructuredData />
 			</head>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-				<MantineProvider theme={theme} defaultColorScheme="dark">
-					<AppShell padding={0} header={{ height: 70 }} footer={{ height: "auto" }}>
-						<AppShellHeader withBorder style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-							<Navbar />
-						</AppShellHeader>
-						<AppShellMain style={{ minHeight: "calc(100vh - 70px)", position: "relative", zIndex: 1 }}>
-							{children}
-						</AppShellMain>
-						<AppShellFooter withBorder style={{ marginTop: "auto", position: "relative", zIndex: 1 }}>
-							<Footer />
-						</AppShellFooter>
-					</AppShell>
-				</MantineProvider>
+				<I18nProvider locale={locale} resources={resources}>
+					<MantineProvider theme={theme} defaultColorScheme="dark">
+						<AppShell padding={0} header={{ height: 70 }} footer={{ height: "auto" }}>
+							<AppShellHeader withBorder style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
+								<Navbar />
+							</AppShellHeader>
+							<AppShellMain style={{ minHeight: "calc(100vh - 70px)", position: "relative", zIndex: 1 }}>
+								{children}
+							</AppShellMain>
+							<AppShellFooter withBorder style={{ marginTop: "auto", position: "relative", zIndex: 1 }}>
+								<Footer />
+							</AppShellFooter>
+						</AppShell>
+					</MantineProvider>
+				</I18nProvider>
 			</body>
 		</html>
 	)

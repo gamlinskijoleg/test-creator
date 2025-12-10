@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button, TextInput, Card, Stack, Group, Title, Text } from "@mantine/core"
 import { IconTrash, IconPlus } from "@tabler/icons-react"
 import { AnswerEditor } from "./AnswerEditor"
@@ -18,6 +19,7 @@ interface QuestionEditorProps {
 
 export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
 	const [answers, setAnswers] = useState<Tables<"answers">[]>(question.answers ?? [])
+	const { t } = useTranslation()
 
 	const handleAddAnswer = () => {
 		const newAnswer: TablesInsert<"answers"> = {
@@ -50,19 +52,19 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
 					<TextInput
 						value={question.question_text}
 						onChange={e => onUpdate({ ...question, question_text: e.target.value })}
-						placeholder="Question text"
+						placeholder={t("question.placeholder")}
 						style={{ flex: 1 }}
 					/>
 					<Button variant="light" color="red" onClick={onDelete} leftSection={<IconTrash size={16} />}>
-						Delete Question
+						{t("question.delete")}
 					</Button>
 				</Group>
 
 				<Stack gap="sm">
 					<Group justify="space-between">
-						<Title order={5}>Answers</Title>
+						<Title order={5}>{t("question.answers")}</Title>
 						<Button variant="outline" onClick={handleAddAnswer} leftSection={<IconPlus size={16} />}>
-							Add Answer
+							{t("question.addAnswer")}
 						</Button>
 					</Group>
 					{answers.map((answer, index) => (
@@ -75,7 +77,7 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
 					))}
 					{answers.length === 0 && (
 						<Text size="sm" c="dimmed">
-							No answers yet. Click "Add Answer" to add one.
+							{t("question.noAnswers")}
 						</Text>
 					)}
 				</Stack>

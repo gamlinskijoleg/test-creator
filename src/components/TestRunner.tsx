@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button, Card, Title, Text, Stack, Radio, Group, Alert, Container } from "@mantine/core"
 import { IconAlertCircle, IconSend } from "@tabler/icons-react"
 import type { Tables } from "@/types/supabase"
@@ -23,6 +24,7 @@ interface TestRunnerProps {
 export function TestRunner({ test, questions, onSubmit, authorProfile }: TestRunnerProps) {
 	const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
 	const [submitting, setSubmitting] = useState(false)
+	const { t } = useTranslation()
 
 	const handleAnswerSelect = (questionId: string, answerId: string) => {
 		setSelectedAnswers({ ...selectedAnswers, [questionId]: answerId })
@@ -35,7 +37,7 @@ export function TestRunner({ test, questions, onSubmit, authorProfile }: TestRun
 			window.location.href = `/results/${result.resultId}`
 		} catch (error) {
 			console.error("Failed to submit test:", error)
-			alert("Failed to submit test. Please try again.")
+			alert(t("editTest.saveFailed"))
 		} finally {
 			setSubmitting(false)
 		}
@@ -64,11 +66,11 @@ export function TestRunner({ test, questions, onSubmit, authorProfile }: TestRun
 								<Stack gap="md">
 									<Group justify="space-between" align="flex-start">
 										<Title order={3} style={{ flex: 1 }}>
-											Question {index + 1}: {question.question_text}
+											{t("runner.question", { index: index + 1 })}: {question.question_text}
 										</Title>
 										{authorName && (
 											<Text size="sm" c="dimmed" style={{ whiteSpace: "nowrap", marginLeft: "1rem" }}>
-												by {authorName}
+												{t("runner.by", { author: authorName })}
 											</Text>
 										)}
 									</Group>
@@ -96,13 +98,13 @@ export function TestRunner({ test, questions, onSubmit, authorProfile }: TestRun
 						leftSection={<IconSend size={16} />}
 						size="lg"
 					>
-						Submit Test
+						{t("runner.submit")}
 					</Button>
 				</Group>
 
 				{!allQuestionsAnswered && (
-					<Alert icon={<IconAlertCircle size={16} />} title="Incomplete Test" color="yellow">
-						Please answer all questions before submitting.
+					<Alert icon={<IconAlertCircle size={16} />} title={t("runner.incompleteTitle")} color="yellow">
+						{t("runner.incompleteText")}
 					</Alert>
 				)}
 			</Stack>

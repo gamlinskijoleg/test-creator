@@ -3,6 +3,8 @@ import type { Tables } from "@/types/supabase"
 
 const PAGE_SIZE = 12
 
+type AuthorFilter = "all" | "mine" | "others"
+
 type TestWithAuthor = Tables<"tests"> & {
 	authorProfile: {
 		name: string | null
@@ -11,20 +13,33 @@ type TestWithAuthor = Tables<"tests"> & {
 }
 
 // Get all tests with pagination (client-side version)
-export async function getAllTestsPaginatedClient(page: number = 1, pageSize: number = PAGE_SIZE) {
+export async function getAllTestsPaginatedClient(
+	page: number = 1,
+	pageSize: number = PAGE_SIZE,
+	options?: { search?: string; authorFilter?: AuthorFilter; userId?: string },
+) {
 	try {
 		const from = (page - 1) * pageSize
 		const to = from + pageSize - 1
+		const search = options?.search?.trim()
+		const authorFilter = options?.authorFilter || "all"
+		const userId = options?.userId
 
-		const {
-			data: tests,
-			error,
-			count,
-		} = await supabaseClient
-			.from("tests")
-			.select("*", { count: "exact" })
-			.order("created_at", { ascending: false })
-			.range(from, to)
+		// Fetch only needed columns; avoid expensive exact count
+		let query = supabaseClient.from("tests").select("id,title,description,author_id,created_at", { count: "planned" })
+
+		if (search && search.length > 0) {
+			const pattern = `%${search}%`
+			query = query.or(`title.ilike.${pattern},description.ilike.${pattern}`)
+		}
+
+		if (authorFilter === "mine" && userId) {
+			query = query.eq("author_id", userId)
+		} else if (authorFilter === "others" && userId) {
+			query = query.neq("author_id", userId)
+		}
+
+		const { data: tests, error } = await query.order("created_at", { ascending: false }).range(from, to)
 
 		if (error) {
 			return {
@@ -59,8 +74,7 @@ export async function getAllTestsPaginatedClient(page: number = 1, pageSize: num
 			testsWithAuthors.push(...(tests || []).map(test => ({ ...test, authorProfile: null })))
 		}
 
-		const totalTests = count || 0
-		const hasMore = to < totalTests - 1
+		const hasMore = (tests?.length || 0) === pageSize
 
 		return {
 			success: true,

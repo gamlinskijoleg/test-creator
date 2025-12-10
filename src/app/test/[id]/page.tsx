@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getTest, submitTest } from "@/lib/actions/tests"
 import { TestRunner } from "@/components/TestRunner"
@@ -19,6 +20,7 @@ export default function TakeTestPage() {
 	const params = useParams<{ id: string }>()
 	const testId = params.id
 	const { user } = useUser()
+	const { t } = useTranslation()
 
 	const [test, setTest] = useState<Test | null>(null)
 	const [questions, setQuestions] = useState<Question[]>([])
@@ -32,7 +34,7 @@ export default function TakeTestPage() {
 				const result = await getTest(testId)
 
 				if (!result.success || !result.test) {
-					throw new Error(result.error || "Failed to load test")
+					throw new Error(result.error || t("takeTest.notFound"))
 				}
 
 				setTest(result.test)
@@ -49,7 +51,7 @@ export default function TakeTestPage() {
 				setQuestions(questionsWithoutCorrectAnswers)
 			} catch (err) {
 				console.error("Error fetching test:", err)
-				setError(err instanceof Error ? err.message : "Failed to load test")
+				setError(err instanceof Error ? err.message : t("takeTest.notFound"))
 			} finally {
 				setLoading(false)
 			}
@@ -90,8 +92,8 @@ export default function TakeTestPage() {
 				<Card shadow="sm" padding="lg" radius="md" withBorder>
 					<Stack gap="md">
 						<Title order={2}>Error</Title>
-						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-							{error || "Test not found"}
+						<Alert icon={<IconAlertCircle size={16} />} title={t("takeTest.error")} color="red">
+							{error || t("takeTest.notFound")}
 						</Alert>
 					</Stack>
 				</Card>

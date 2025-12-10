@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button, Group, Title, Stack, Paper, Text } from "@mantine/core"
 import { IconPlus, IconDeviceFloppy } from "@tabler/icons-react"
 import { QuestionEditor } from "./QuestionEditor"
@@ -19,6 +20,7 @@ interface TestBuilderProps {
 export function TestBuilder({ testId, initialQuestions = [], onSave }: TestBuilderProps) {
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 	const [saving, setSaving] = useState(false)
+	const { t } = useTranslation()
 
 	const handleAddQuestion = () => {
 		const newQuestion: TablesInsert<"questions"> = {
@@ -52,13 +54,13 @@ export function TestBuilder({ testId, initialQuestions = [], onSave }: TestBuild
 	return (
 		<Stack gap="lg">
 			<Group justify="space-between">
-				<Title order={2}>Test Builder</Title>
+				<Title order={2}>{t("builder.title")}</Title>
 				<Group gap="sm">
 					<Button variant="outline" onClick={handleAddQuestion} leftSection={<IconPlus size={16} />}>
-						Add Question
+						{t("builder.addQuestion")}
 					</Button>
 					<Button onClick={handleSave} disabled={saving} loading={saving} leftSection={<IconDeviceFloppy size={16} />}>
-						Save Test
+						{t("builder.save")}
 					</Button>
 				</Group>
 			</Group>
@@ -82,9 +84,9 @@ export function TestBuilder({ testId, initialQuestions = [], onSave }: TestBuild
 						}}
 					>
 						<Stack gap="md" align="center">
-							<Text c="dimmed">No questions yet. Click "Add Question" to get started.</Text>
+							<Text c="dimmed">{t("builder.empty")}</Text>
 							<Button onClick={handleAddQuestion} leftSection={<IconPlus size={16} />}>
-								Add First Question
+								{t("builder.addFirst")}
 							</Button>
 						</Stack>
 					</Paper>

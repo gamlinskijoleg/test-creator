@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getUserProfile, upsertUserProfile } from "@/lib/actions/user"
 import { Container, Card, Title, TextInput, Button, Stack, Group, Loader, Select, Text, Alert } from "@mantine/core"
@@ -18,14 +19,6 @@ import {
 	IconCalendar,
 } from "@tabler/icons-react"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
-
-const pronounsOptions = [
-	{ value: "he/him", label: "He/Him" },
-	{ value: "she/her", label: "She/Her" },
-	{ value: "they/them", label: "They/Them" },
-	{ value: "other", label: "Other" },
-	{ value: "prefer-not-to-say", label: "Prefer not to say" },
-]
 
 const accountSchema = z.object({
 	name: z.string().optional(),
@@ -40,6 +33,7 @@ type AccountFormData = z.infer<typeof accountSchema>
 export default function AccountPage() {
 	const router = useRouter()
 	const { user, loading: userLoading } = useUser()
+	const { t } = useTranslation()
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
@@ -60,6 +54,17 @@ export default function AccountPage() {
 			city: "",
 		},
 	})
+
+	const pronounsOptions = useMemo(
+		() => [
+			{ value: "he/him", label: t("account.options.he") },
+			{ value: "she/her", label: t("account.options.she") },
+			{ value: "they/them", label: t("account.options.they") },
+			{ value: "other", label: t("account.options.other") },
+			{ value: "prefer-not-to-say", label: t("account.options.none") },
+		],
+		[t],
+	)
 
 	useEffect(() => {
 		if (!userLoading) {
@@ -104,13 +109,13 @@ export default function AccountPage() {
 			})
 
 			if (!result.success) {
-				setError(result.error || "Failed to save profile")
+				setError(result.error || t("account.failed"))
 			} else {
-				setSuccess("Profile saved successfully!")
+				setSuccess(t("account.successText"))
 			}
 		} catch (err) {
 			console.error("Error saving profile:", err)
-			setError(err instanceof Error ? err.message : "Failed to save profile")
+			setError(err instanceof Error ? err.message : t("account.failed"))
 		}
 	}
 
@@ -134,24 +139,24 @@ export default function AccountPage() {
 			<Card shadow="sm" padding="lg" radius="md" withBorder>
 				<Stack gap="lg">
 					<Group justify="space-between">
-						<Title order={1}>Account Settings</Title>
+						<Title order={1}>{t("account.title")}</Title>
 						<Button component={Link} href="/dashboard" variant="subtle" leftSection={<IconArrowLeft size={16} />}>
-							Back
+							{t("account.back")}
 						</Button>
 					</Group>
 
 					<Text c="dimmed" size="sm">
-						Manage your account information and preferences.
+						{t("account.subtitle")}
 					</Text>
 
 					{error && (
-						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
+						<Alert icon={<IconAlertCircle size={16} />} title={t("account.errorTitle")} color="red">
 							{error}
 						</Alert>
 					)}
 
 					{success && (
-						<Alert icon={<IconCheck size={16} />} title="Success" color="green">
+						<Alert icon={<IconCheck size={16} />} title={t("account.successTitle")} color="green">
 							{success}
 						</Alert>
 					)}
@@ -160,17 +165,17 @@ export default function AccountPage() {
 						<Stack gap="md">
 							<Group grow>
 								<TextInput
-									label="First Name"
+									label={t("account.firstName")}
 									{...register("name")}
 									error={errors.name?.message}
-									placeholder="Enter your first name"
+									placeholder={t("account.firstNamePlaceholder")}
 									leftSection={<IconUser size={16} />}
 								/>
 								<TextInput
-									label="Last Name"
+									label={t("account.lastName")}
 									{...register("surname")}
 									error={errors.surname?.message}
-									placeholder="Enter your last name"
+									placeholder={t("account.lastNamePlaceholder")}
 								/>
 							</Group>
 
@@ -179,14 +184,14 @@ export default function AccountPage() {
 								control={control}
 								render={({ field }) => (
 									<TextInput
-										label="Birthdate"
+										label={t("account.birthdate")}
 										type="date"
 										value={field.value ? field.value.toISOString().split("T")[0] : ""}
 										onChange={e => {
 											const dateValue = e.target.value ? new Date(e.target.value) : null
 											field.onChange(dateValue)
 										}}
-										placeholder="Select your birthdate"
+										placeholder={t("account.birthdatePlaceholder")}
 										max={new Date().toISOString().split("T")[0]}
 										leftSection={<IconCalendar size={16} />}
 										error={errors.birthdate?.message}
@@ -204,10 +209,10 @@ export default function AccountPage() {
 								control={control}
 								render={({ field }) => (
 									<Select
-										label="Pronouns"
+										label={t("account.pronouns")}
 										value={field.value || ""}
 										onChange={field.onChange}
-										placeholder="Select your pronouns"
+										placeholder={t("account.pronounsPlaceholder")}
 										data={pronounsOptions}
 										clearable
 										searchable
@@ -217,15 +222,15 @@ export default function AccountPage() {
 							/>
 
 							<TextInput
-								label="City"
+								label={t("account.city")}
 								{...register("city")}
 								error={errors.city?.message}
-								placeholder="Enter your city"
+								placeholder={t("account.cityPlaceholder")}
 							/>
 
 							<Group justify="flex-end" mt="md">
 								<Button type="submit" loading={isSubmitting} leftSection={<IconDeviceFloppy size={16} />}>
-									Save Changes
+									{t("account.save")}
 								</Button>
 							</Group>
 						</Stack>

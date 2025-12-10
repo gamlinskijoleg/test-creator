@@ -3,22 +3,25 @@
 import Link from "next/link"
 import { Container, SimpleGrid, Text, Stack, Anchor, Divider, Group } from "@mantine/core"
 import { IconHome, IconDashboard, IconPlus, IconSearch } from "@tabler/icons-react"
+import { useTranslation } from "react-i18next"
 
 export function Footer() {
+	const { t } = useTranslation()
+
 	return (
 		<Container size="xl" py="xl">
 			<SimpleGrid cols={{ base: 1, md: 2 }}>
 				<Stack gap="xs">
 					<Text fw={700} size="lg" c="blue">
-						Testy
+						{t("brand")}
 					</Text>
 					<Text size="sm" c="dimmed" maw={280}>
-						Create and share interactive tests and quizzes with ease. Track results and engage with your audience.
+						{t("footer.tagline")}
 					</Text>
 				</Stack>
 				<Stack gap="md">
 					<Text fw={600} size="sm">
-						Navigation
+						{t("footer.navigation")}
 					</Text>
 					<Stack gap="xs">
 						<Anchor
@@ -31,7 +34,7 @@ export function Footer() {
 						>
 							<Group gap={6} wrap="nowrap">
 								<IconHome size={16} />
-								<span>Home</span>
+								<span>{t("footer.home")}</span>
 							</Group>
 						</Anchor>
 						<Anchor
@@ -44,7 +47,7 @@ export function Footer() {
 						>
 							<Group gap={6} wrap="nowrap">
 								<IconSearch size={16} />
-								<span>Explore Tests</span>
+								<span>{t("footer.explore")}</span>
 							</Group>
 						</Anchor>
 						<Anchor
@@ -57,7 +60,7 @@ export function Footer() {
 						>
 							<Group gap={6} wrap="nowrap">
 								<IconDashboard size={16} />
-								<span>Dashboard</span>
+								<span>{t("footer.dashboard")}</span>
 							</Group>
 						</Anchor>
 						<Anchor
@@ -70,7 +73,7 @@ export function Footer() {
 						>
 							<Group gap={6} wrap="nowrap">
 								<IconPlus size={16} />
-								<span>Create Test</span>
+								<span>{t("footer.create")}</span>
 							</Group>
 						</Anchor>
 					</Stack>
@@ -78,7 +81,7 @@ export function Footer() {
 			</SimpleGrid>
 			<Divider my="xl" />
 			<Text size="sm" c="dimmed" ta="center">
-				© {new Date().getFullYear()} Testy. All rights reserved.
+				© {new Date().getFullYear()} {t("brand")}. {t("footer.rights")}
 			</Text>
 		</Container>
 	)

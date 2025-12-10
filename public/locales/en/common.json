@@ -1,0 +1,185 @@
+{
+	"brand": "Testy",
+	"language": {
+		"label": "Language",
+		"ariaLabel": "Select language",
+		"en": "English",
+		"uk": "Ukrainian"
+	},
+	"navbar": {
+		"explore": "Explore Tests",
+		"dashboard": "Dashboard",
+		"create": "Create Test",
+		"account": "Account",
+		"signIn": "Sign In",
+		"signOut": "Sign Out",
+		"menu": "Menu"
+	},
+	"footer": {
+		"navigation": "Navigation",
+		"home": "Home",
+		"explore": "Explore Tests",
+		"dashboard": "Dashboard",
+		"create": "Create Test",
+		"rights": "All rights reserved.",
+		"tagline": "Create and share interactive tests and quizzes with ease. Track results and engage with your audience."
+	},
+	"home": {
+		"heroTitle": "Create & Take Tests",
+		"heroHighlight": "Made Simple",
+		"heroSubtitle": "Build interactive quizzes and tests with ease. Share them with others and track results in real-time.",
+		"goDashboard": "Go to Dashboard",
+		"createTest": "Create Test",
+		"getStarted": "Get Started",
+		"signIn": "Sign In",
+		"featuresTitle": "Everything you need to create amazing tests",
+		"featureEasyTitle": "Easy Test Creation",
+		"featureEasyText": "Create tests with multiple questions and answers. Add as many questions as you need with ease.",
+		"featureResultsTitle": "Instant Results",
+		"featureResultsText": "Get immediate feedback with detailed results showing correct and incorrect answers.",
+		"featureShareTitle": "Share & Collaborate",
+		"featureShareText": "Share your tests with anyone. Public links make it easy for others to take your tests.",
+		"ctaTitle": "Ready to create your first test?",
+		"ctaSubtitle": "Join thousands of users creating amazing tests every day.",
+		"ctaCreate": "Create Your Test",
+		"ctaStart": "Get Started Free"
+	},
+	"tests": {
+		"title": "Explore Tests",
+		"searchPlaceholder": "Search by title or description",
+		"filterAuthor": "Filter by author",
+		"badgeSearch": "Search: “{{value}}”",
+		"badgeFilters": "Filters active",
+		"clear": "Clear filters",
+		"noTests": "No tests available yet.",
+		"yourTest": "Your test",
+		"edit": "Edit",
+		"take": "Take Test",
+		"loadingMore": "Loading more tests...",
+		"author": {
+			"all": "All",
+			"mine": "My tests",
+			"others": "Others"
+		}
+	},
+	"dashboard": {
+		"title": "My Tests",
+		"create": "Create New Test",
+		"empty": "You haven't created any tests yet.",
+		"emptyCta": "Create Your First Test",
+		"loadingMore": "Loading more tests..."
+	},
+	"createForm": {
+		"title": "Create New Test",
+		"testTitle": "Test Title",
+		"testTitlePlaceholder": "Enter test title",
+		"description": "Description (optional)",
+		"descriptionPlaceholder": "Enter test description",
+		"errorTitle": "Error",
+		"cancel": "Cancel",
+		"submit": "Create Test",
+		"required": "Test title is required",
+		"failed": "Failed to create test"
+	},
+	"builder": {
+		"title": "Test Builder",
+		"addQuestion": "Add Question",
+		"save": "Save Test",
+		"empty": "No questions yet. Click \"Add Question\" to get started.",
+		"addFirst": "Add First Question"
+	},
+	"question": {
+		"placeholder": "Question text",
+		"delete": "Delete Question",
+		"answers": "Answers",
+		"addAnswer": "Add Answer",
+		"noAnswers": "No answers yet. Click \"Add Answer\" to add one."
+	},
+	"answer": {
+		"placeholder": "Answer text",
+		"correct": "Correct answer",
+		"delete": "Delete"
+	},
+	"share": {
+		"share": "Share",
+		"copy": "Copy Link",
+		"copied": "Copied!",
+		"text": "Take this test: {{title}}",
+		"defaultTitle": "Test"
+	},
+	"runner": {
+		"question": "Question {{index}}",
+		"by": "by {{author}}",
+		"submit": "Submit Test",
+		"incompleteTitle": "Incomplete Test",
+		"incompleteText": "Please answer all questions before submitting."
+	},
+	"results": {
+		"title": "Test Results",
+		"correct": "Correct",
+		"total": "Total",
+		"score": "Score",
+		"yourAnswers": "Your Answers",
+		"question": "Question {{index}}",
+		"badgeCorrect": "Correct",
+		"badgeIncorrect": "Incorrect",
+		"yourAnswer": "Your answer:",
+		"noAnswer": "No answer selected",
+		"correctAnswer": "Correct answer:"
+	},
+	"unauth": {
+		"title": "Please sign in",
+		"text": "You need to be signed in to access this page.",
+		"signIn": "Sign In"
+	},
+	"errors": {
+		"title": "Error",
+		"testNotFound": "Test not found",
+		"resultsNotFound": "Results not found",
+		"loadFailed": "Failed to load",
+		"saveFailed": "Failed to save"
+	},
+	"editTest": {
+		"back": "Back",
+		"error": "Error",
+		"notFound": "Test not found",
+		"saveSuccess": "Test saved successfully!",
+		"saveFailed": "Failed to save test. Please try again."
+	},
+	"takeTest": {
+		"error": "Error",
+		"notFound": "Test not found"
+	},
+	"resultsPage": {
+		"error": "Error",
+		"notFound": "Results not found"
+	},
+	"account": {
+		"title": "Account Settings",
+		"back": "Back",
+		"subtitle": "Manage your account information and preferences.",
+		"errorTitle": "Error",
+		"successTitle": "Success",
+		"successText": "Profile saved successfully!",
+		"firstName": "First Name",
+		"lastName": "Last Name",
+		"firstNamePlaceholder": "Enter your first name",
+		"lastNamePlaceholder": "Enter your last name",
+		"birthdate": "Birthdate",
+		"birthdatePlaceholder": "Select your birthdate",
+		"pronouns": "Pronouns",
+		"pronounsPlaceholder": "Select your pronouns",
+		"city": "City",
+		"cityPlaceholder": "Enter your city",
+		"save": "Save Changes",
+		"failed": "Failed to save profile",
+		"options": {
+			"he": "He/Him",
+			"she": "She/Her",
+			"they": "They/Them",
+			"other": "Other",
+			"none": "Prefer not to say"
+		}
+	}
+}
+

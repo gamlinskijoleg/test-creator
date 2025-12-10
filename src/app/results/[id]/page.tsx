@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { getTestResult } from "@/lib/actions/tests"
 import { ResultsView } from "@/components/ResultsView"
 import { Container, Card, Title, Stack, Loader, Alert } from "@mantine/core"
@@ -21,6 +22,7 @@ type TestResult = Tables<"test_results"> & {
 export default function ResultsPage() {
 	const params = useParams<{ id: string }>()
 	const resultId = params.id
+	const { t } = useTranslation()
 
 	const [result, setResult] = useState<TestResult | null>(null)
 	const [loading, setLoading] = useState(true)
@@ -32,13 +34,13 @@ export default function ResultsPage() {
 				const result = await getTestResult(resultId)
 
 				if (!result.success || !result.result) {
-					throw new Error(result.error || "Failed to load results")
+					throw new Error(result.error || t("resultsPage.notFound"))
 				}
 
 				setResult(result.result as TestResult)
 			} catch (err) {
 				console.error("Error fetching result:", err)
-				setError(err instanceof Error ? err.message : "Failed to load results")
+				setError(err instanceof Error ? err.message : t("resultsPage.notFound"))
 			} finally {
 				setLoading(false)
 			}
@@ -67,8 +69,8 @@ export default function ResultsPage() {
 				<Card shadow="sm" padding="lg" radius="md" withBorder>
 					<Stack gap="md">
 						<Title order={2}>Error</Title>
-						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-							{error || "Results not found"}
+						<Alert icon={<IconAlertCircle size={16} />} title={t("resultsPage.error")} color="red">
+							{error || t("resultsPage.notFound")}
 						</Alert>
 					</Stack>
 				</Card>

@@ -1,11 +1,29 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getAllTestsPaginatedClient } from "@/lib/client/user"
-import { Container, Title, Card, Text, Grid, GridCol, Stack, Group, Loader, Button, Box } from "@mantine/core"
-import { IconPlayerPlay, IconUser } from "@tabler/icons-react"
+import { useDebouncedValue } from "@mantine/hooks"
+import {
+	Container,
+	Title,
+	Card,
+	Text,
+	Grid,
+	GridCol,
+	Stack,
+	Group,
+	Loader,
+	Button,
+	Box,
+	TextInput,
+	Select,
+	ActionIcon,
+	Badge,
+} from "@mantine/core"
+import { IconPlayerPlay, IconUser, IconSearch, IconX, IconFilter } from "@tabler/icons-react"
 import { ShareButtons } from "@/components/ShareButtons"
 import type { Tables } from "@/types/supabase"
 
@@ -18,58 +36,80 @@ type Test = Tables<"tests"> & {
 
 export default function TestsPage() {
 	const { user } = useUser()
+	const { t } = useTranslation()
 	const [tests, setTests] = useState<Test[]>([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
-	const [page, setPage] = useState(1)
 	const [visibleTests, setVisibleTests] = useState<Set<string>>(new Set())
+	const [search, setSearch] = useState("")
+	const [authorFilter, setAuthorFilter] = useState<"all" | "mine" | "others">("all")
+	const [debouncedSearch] = useDebouncedValue(search.trim(), 500)
 	const observerTarget = useRef<HTMLDivElement>(null)
 	const isLoadingRef = useRef(false)
 	const testRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+	const pageRef = useRef(1)
+	const authorOptions = useMemo(
+		() => [
+			{ value: "all", label: t("tests.author.all") },
+			{ value: "mine", label: t("tests.author.mine") },
+			{ value: "others", label: t("tests.author.others") },
+		],
+		[t],
+	)
 
-	const fetchTests = useCallback(async (pageNum: number, append: boolean = false) => {
-		if (isLoadingRef.current) return
+	const fetchTests = useCallback(
+		async (pageNum: number, append: boolean = false, searchTerm?: string, authorScope?: typeof authorFilter) => {
+			if (isLoadingRef.current) return
 
-		try {
-			isLoadingRef.current = true
-			setLoadingMore(true)
-			const result = await getAllTestsPaginatedClient(pageNum)
+			try {
+				isLoadingRef.current = true
+				setLoadingMore(true)
+				const result = await getAllTestsPaginatedClient(pageNum, undefined, {
+					search: searchTerm,
+					authorFilter: authorScope,
+					userId: user?.id,
+				})
 
-			if (result.success) {
-				if (append) {
-					setTests(prev => [...prev, ...result.tests])
+				if (result.success) {
+					if (append) {
+						setTests(prev => [...prev, ...result.tests])
+					} else {
+						setTests(result.tests)
+						pageRef.current = 1
+					}
+					setHasMore(result.hasMore)
 				} else {
-					setTests(result.tests)
-					setPage(1)
+					console.error("Failed to fetch tests:", result.error)
 				}
-				setHasMore(result.hasMore)
-			} else {
-				console.error("Failed to fetch tests:", result.error)
+			} catch (error) {
+				console.error("Error fetching tests:", error)
+			} finally {
+				setLoadingMore(false)
+				isLoadingRef.current = false
 			}
-		} catch (error) {
-			console.error("Error fetching tests:", error)
-		} finally {
-			setLoadingMore(false)
-			isLoadingRef.current = false
-		}
-	}, [])
+		},
+		[user?.id],
+	)
 
 	useEffect(() => {
-		fetchTests(1, false)
-		setLoading(false)
-	}, [fetchTests])
+		const load = async () => {
+			setLoading(true)
+			setVisibleTests(new Set())
+			await fetchTests(1, false, debouncedSearch, authorFilter)
+			setLoading(false)
+		}
+		load()
+	}, [fetchTests, debouncedSearch, authorFilter])
 
 	// Observer for infinite scroll
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			entries => {
 				if (entries[0].isIntersecting && hasMore && !loadingMore && !loading && !isLoadingRef.current) {
-					setPage(prevPage => {
-						const nextPage = prevPage + 1
-						fetchTests(nextPage, true)
-						return nextPage
-					})
+					const nextPage = pageRef.current + 1
+					pageRef.current = nextPage
+					fetchTests(nextPage, true, debouncedSearch, authorFilter)
 				}
 			},
 			{ threshold: 0.1 },
@@ -85,7 +125,7 @@ export default function TestsPage() {
 				observer.unobserve(currentTarget)
 			}
 		}
-	}, [hasMore, loadingMore, loading, fetchTests])
+	}, [hasMore, loadingMore, loading, fetchTests, debouncedSearch, authorFilter])
 
 	// Observer for fade-in animation on each test card
 	useEffect(() => {
@@ -118,36 +158,72 @@ export default function TestsPage() {
 		}
 	}, [tests])
 
-	if (loading) {
-		return (
-			<Container
-				size="xl"
-				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
-			>
-				<Loader />
-			</Container>
-		)
-	}
+	const getAuthorName = useCallback(
+		(test: Test): string => {
+			if (!test.authorProfile) return t("tests.author.others")
+			const { name, surname } = test.authorProfile
+			if (name && surname) return `${name} ${surname}`
+			if (name) return name
+			if (surname) return surname
+			return t("tests.author.others")
+		},
+		[t],
+	)
 
-	const getAuthorName = (test: Test): string => {
-		if (!test.authorProfile) return "Unknown"
-		const { name, surname } = test.authorProfile
-		if (name && surname) return `${name} ${surname}`
-		if (name) return name
-		if (surname) return surname
-		return "Unknown"
-	}
+	const handleClear = useCallback(() => {
+		setSearch("")
+		setAuthorFilter("all")
+	}, [])
 
 	return (
 		<Container size="xl" py="xl">
 			<Stack gap="lg">
-				<Title order={1}>Explore Tests</Title>
+				<Stack gap="xs">
+					<Title order={1}>{t("tests.title")}</Title>
+					<Group gap="sm" align="flex-end" justify="space-between" wrap="wrap">
+						<Group gap="sm" wrap="wrap" style={{ flex: 1, minWidth: 280 }}>
+							<TextInput
+								placeholder={t("tests.searchPlaceholder")}
+								leftSection={<IconSearch size={16} />}
+								value={search}
+								onChange={e => setSearch(e.currentTarget.value)}
+								aria-label={t("tests.searchPlaceholder")}
+								style={{ minWidth: 220 }}
+							/>
+							<Select
+								aria-label={t("tests.filterAuthor")}
+								leftSection={<IconFilter size={16} />}
+								data={[...authorOptions]}
+								value={authorFilter}
+								onChange={value => {
+									if (!user && value !== "all") {
+										setAuthorFilter("all")
+										return
+									}
+									setAuthorFilter((value as typeof authorFilter) || "all")
+								}}
+								styles={{ input: { minWidth: 170 } }}
+								disabled={!user}
+							/>
+						</Group>
+						<Group gap="xs">
+							{(debouncedSearch || authorFilter !== "all") && (
+								<Badge variant="light" color="blue">
+									{debouncedSearch ? t("tests.badgeSearch", { value: debouncedSearch }) : t("tests.badgeFilters")}
+								</Badge>
+							)}
+							<ActionIcon variant="subtle" onClick={handleClear} aria-label={t("tests.clear")}>
+								<IconX size={16} />
+							</ActionIcon>
+						</Group>
+					</Group>
+				</Stack>
 
 				{tests.length === 0 && !loadingMore ? (
 					<Card shadow="sm" padding="xl" radius="md" withBorder>
 						<Stack gap="md" align="center">
 							<Text c="dimmed" ta="center">
-								No tests available yet.
+								{t("tests.noTests")}
 							</Text>
 						</Stack>
 					</Card>
@@ -192,7 +268,7 @@ export default function TestsPage() {
 														</Group>
 														{isOwner && (
 															<Text size="xs" c="blue">
-																Your test
+																{t("tests.yourTest")}
 															</Text>
 														)}
 													</Stack>
@@ -205,7 +281,7 @@ export default function TestsPage() {
 																	variant="outline"
 																	style={{ flex: 1 }}
 																>
-																	Edit
+																	{t("tests.edit")}
 																</Button>
 															)}
 															<Button
@@ -214,7 +290,7 @@ export default function TestsPage() {
 																style={{ flex: isOwner ? 1 : undefined, width: isOwner ? undefined : "100%" }}
 																leftSection={<IconPlayerPlay size={16} />}
 															>
-																Take Test
+																{t("tests.take")}
 															</Button>
 														</Group>
 														<ShareButtons testId={test.id} testTitle={test.title} />
@@ -232,7 +308,7 @@ export default function TestsPage() {
 									<Stack align="center" gap="md" py="xl">
 										<Loader size="sm" />
 										<Text size="sm" c="dimmed">
-											Loading more tests...
+											{t("tests.loadingMore")}
 										</Text>
 									</Stack>
 								)}

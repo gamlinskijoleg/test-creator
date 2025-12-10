@@ -2,6 +2,7 @@
 
 import { Card, Title, Text, Grid, GridCol, Stack, Badge, Paper, Container, Group } from "@mantine/core"
 import { IconCheck, IconX } from "@tabler/icons-react"
+import { useTranslation } from "react-i18next"
 import type { Tables } from "@/types/supabase"
 
 type TestResult = Tables<"test_results">
@@ -30,13 +31,14 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 	const totalQuestions = result.given_answers?.length ?? 0
 	const score = result.score ?? 0
 	const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0
+	const { t } = useTranslation()
 
 	return (
 		<Container size="md">
 			<Stack gap="lg">
 				<Card shadow="sm" padding="lg" radius="md" withBorder>
 					<Stack gap="md">
-						<Title order={1}>Test Results</Title>
+						<Title order={1}>{t("results.title")}</Title>
 						<Title order={2} size="h3" c="dimmed">
 							{result.test.title}
 						</Title>
@@ -49,7 +51,7 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 											{score}
 										</Text>
 										<Text size="sm" c="dimmed">
-											Correct
+											{t("results.correct")}
 										</Text>
 									</Stack>
 								</Paper>
@@ -61,7 +63,7 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 											{totalQuestions}
 										</Text>
 										<Text size="sm" c="dimmed">
-											Total
+											{t("results.total")}
 										</Text>
 									</Stack>
 								</Paper>
@@ -73,7 +75,7 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 											{percentage.toFixed(1)}%
 										</Text>
 										<Text size="sm" c="dimmed">
-											Score
+											{t("results.score")}
 										</Text>
 									</Stack>
 								</Paper>
@@ -84,7 +86,7 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 
 				{showCorrectAnswers && result.given_answers && (
 					<Stack gap="md">
-						<Title order={3}>Your Answers</Title>
+						<Title order={3}>{t("results.yourAnswers")}</Title>
 						{result.given_answers.map((givenAnswer, index) => {
 							const question = givenAnswer.question
 							const selectedAnswer = givenAnswer.answer
@@ -98,29 +100,29 @@ export function ResultsView({ result, showCorrectAnswers = true }: ResultsViewPr
 										<Stack gap="xs">
 											<Group justify="space-between" align="flex-start">
 												<Title order={4}>
-													Question {index + 1}: {question.question_text}
+													{t("results.question", { index: index + 1 })}: {question.question_text}
 												</Title>
 												<Badge
 													color={isCorrect ? "green" : "red"}
 													leftSection={isCorrect ? <IconCheck size={14} /> : <IconX size={14} />}
 												>
-													{isCorrect ? "Correct" : "Incorrect"}
+													{isCorrect ? t("results.badgeCorrect") : t("results.badgeIncorrect")}
 												</Badge>
 											</Group>
 										</Stack>
 
 										<Stack gap="xs">
 											<Text size="sm" fw={500} c="dimmed">
-												Your answer:
+												{t("results.yourAnswer")}
 											</Text>
 											<Paper p="sm" withBorder bg={isCorrect ? "green.1" : "red.1"} c={isCorrect ? "green.9" : "red.9"}>
-												{selectedAnswer?.answer_text ?? "No answer selected"}
+												{selectedAnswer?.answer_text ?? t("results.noAnswer")}
 											</Paper>
 
 											{!isCorrect && correctAnswer && (
 												<>
 													<Text size="sm" fw={500} c="dimmed">
-														Correct answer:
+														{t("results.correctAnswer")}
 													</Text>
 													<Paper p="sm" withBorder bg="green.1" c="green.9">
 														{correctAnswer.answer_text}

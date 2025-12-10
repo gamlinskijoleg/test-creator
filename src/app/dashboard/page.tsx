@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getUserTestsPaginated } from "@/lib/actions/user"
 import { Container, Title, Button, Card, Text, Grid, GridCol, Stack, Group, Loader } from "@mantine/core"
@@ -14,6 +15,7 @@ type Test = Tables<"tests">
 
 export default function DashboardPage() {
 	const { user, loading: userLoading } = useUser()
+	const { t } = useTranslation()
 	const [tests, setTests] = useState<Test[]>([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -105,9 +107,9 @@ export default function DashboardPage() {
 		<Container size="xl" py="xl">
 			<Stack gap="lg">
 				<Group justify="space-between">
-					<Title order={1}>My Tests</Title>
+					<Title order={1}>{t("dashboard.title")}</Title>
 					<Button component={Link} href="/create" leftSection={<IconPlus size={16} />}>
-						Create New Test
+						{t("dashboard.create")}
 					</Button>
 				</Group>
 
@@ -115,10 +117,10 @@ export default function DashboardPage() {
 					<Card shadow="sm" padding="xl" radius="md" withBorder>
 						<Stack gap="md" align="center">
 							<Text c="dimmed" ta="center">
-								You haven't created any tests yet.
+								{t("dashboard.empty")}
 							</Text>
 							<Button component={Link} href="/create" leftSection={<IconPlus size={16} />}>
-								Create Your First Test
+								{t("dashboard.emptyCta")}
 							</Button>
 						</Stack>
 					</Card>
@@ -146,7 +148,7 @@ export default function DashboardPage() {
 														style={{ flex: 1 }}
 														leftSection={<IconEdit size={16} />}
 													>
-														Edit
+														{t("tests.edit")}
 													</Button>
 													<Button
 														component={Link}
@@ -154,7 +156,7 @@ export default function DashboardPage() {
 														style={{ flex: 1 }}
 														leftSection={<IconPlayerPlay size={16} />}
 													>
-														Take Test
+														{t("tests.take")}
 													</Button>
 												</Group>
 												<ShareButtons testId={test.id} testTitle={test.title} />
@@ -170,7 +172,7 @@ export default function DashboardPage() {
 									<Stack align="center" gap="md" py="xl">
 										<Loader size="sm" />
 										<Text size="sm" c="dimmed">
-											Loading more tests...
+											{t("dashboard.loadingMore")}
 										</Text>
 									</Stack>
 								)}

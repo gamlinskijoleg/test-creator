@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { getTest, saveTestQuestions } from "@/lib/actions/tests"
 import { useUser } from "@/lib/hooks/useUser"
 import { TestBuilder } from "@/components/TestBuilder"
@@ -19,6 +20,7 @@ export default function EditTestPage() {
 	const params = useParams<{ id: string }>()
 	const router = useRouter()
 	const testId = params.id
+	const { t } = useTranslation()
 
 	const { user, loading: userLoading } = useUser()
 	const [test, setTest] = useState<Tables<"tests"> | null>(null)
@@ -38,14 +40,14 @@ export default function EditTestPage() {
 					const result = await getTest(testId)
 
 					if (!result.success || !result.test) {
-						throw new Error(result.error || "Failed to load test")
+						throw new Error(result.error || t("errors.testNotFound"))
 					}
 
 					setTest(result.test)
 					setQuestions(result.questions)
 				} catch (err) {
 					console.error("Error fetching test:", err)
-					setError(err instanceof Error ? err.message : "Failed to load test")
+					setError(err instanceof Error ? err.message : t("errors.testNotFound"))
 				} finally {
 					setLoading(false)
 				}
@@ -60,15 +62,15 @@ export default function EditTestPage() {
 			const result = await saveTestQuestions(testId, updatedQuestions)
 
 			if (!result.success) {
-				throw new Error(result.error || "Failed to save test")
+				throw new Error(result.error || t("editTest.saveFailed"))
 			}
 
 			// Update local state
 			setQuestions(updatedQuestions)
-			alert("Test saved successfully!")
+			alert(t("editTest.saveSuccess"))
 		} catch (err) {
 			console.error("Error saving test:", err)
-			alert(err instanceof Error ? `Failed to save test: ${err.message}` : "Failed to save test. Please try again.")
+			alert(err instanceof Error ? err.message : t("editTest.saveFailed"))
 			throw err
 		}
 	}
@@ -93,8 +95,8 @@ export default function EditTestPage() {
 				<Card shadow="sm" padding="lg" radius="md" withBorder>
 					<Stack gap="md">
 						<Title order={2}>Error</Title>
-						<Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-							{error || "Test not found"}
+						<Alert icon={<IconAlertCircle size={16} />} title={t("editTest.error")} color="red">
+							{error || t("editTest.notFound")}
 						</Alert>
 					</Stack>
 				</Card>
@@ -110,7 +112,7 @@ export default function EditTestPage() {
 		<Container size="xl" py="xl">
 			<Stack gap="lg">
 				<Button variant="subtle" onClick={() => router.back()} leftSection={<IconArrowLeft size={16} />}>
-					Back
+					{t("editTest.back")}
 				</Button>
 				<Group justify="space-between" align="flex-start">
 					<Stack gap="xs">

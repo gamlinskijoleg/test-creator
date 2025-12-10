@@ -6,12 +6,15 @@ import { signOut } from "@/lib/actions/auth"
 import { useUser } from "@/lib/hooks/useUser"
 import { Group, Button, Text, Loader, Container, Box, Burger, Drawer, Stack, Divider } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
+import { useTranslation } from "react-i18next"
 import { IconDashboard, IconPlus, IconLogout, IconLogin, IconSearch, IconUser } from "@tabler/icons-react"
+import { LanguageSwitcher } from "./LanguageSwitcher"
 
 export function Navbar() {
 	const router = useRouter()
 	const { user, loading, refresh } = useUser({ polling: true })
 	const [opened, { toggle, close }] = useDisclosure(false)
+	const { t } = useTranslation()
 
 	const handleSignOut = async () => {
 		const result = await signOut()
@@ -29,7 +32,7 @@ export function Navbar() {
 					<Group h="100%" justify="space-between" wrap="nowrap">
 						<Group gap="xl" wrap="nowrap">
 							<Text component={Link} href="/" fw={700} size="xl" c="blue" style={{ textDecoration: "none" }}>
-								Testy
+								{t("brand")}
 							</Text>
 							<Group gap="xs" visibleFrom="sm">
 								<Button
@@ -39,7 +42,7 @@ export function Navbar() {
 									leftSection={<IconSearch size={18} />}
 									size="sm"
 								>
-									Explore Tests
+									{t("navbar.explore")}
 								</Button>
 								{user && (
 									<>
@@ -50,7 +53,7 @@ export function Navbar() {
 											leftSection={<IconDashboard size={18} />}
 											size="sm"
 										>
-											Dashboard
+											{t("navbar.dashboard")}
 										</Button>
 										<Button
 											component={Link}
@@ -59,13 +62,14 @@ export function Navbar() {
 											leftSection={<IconPlus size={18} />}
 											size="sm"
 										>
-											Create Test
+											{t("navbar.create")}
 										</Button>
 									</>
 								)}
 							</Group>
 						</Group>
-						<Group gap="md" wrap="nowrap">
+						<Group gap="md" wrap="nowrap" align="center">
+							<LanguageSwitcher />
 							{loading ? (
 								<Loader size="sm" />
 							) : user ? (
@@ -78,15 +82,15 @@ export function Navbar() {
 										size="sm"
 										visibleFrom="sm"
 									>
-										Account
+										{t("navbar.account")}
 									</Button>
 									<Button variant="light" onClick={handleSignOut} leftSection={<IconLogout size={16} />} size="sm">
-										Sign Out
+										{t("navbar.signOut")}
 									</Button>
 								</>
 							) : (
 								<Button component={Link} href="/auth" leftSection={<IconLogin size={16} />} size="sm">
-									Sign In
+									{t("navbar.signIn")}
 								</Button>
 							)}
 							<Burger opened={opened} onClick={toggle} hiddenFrom="sm" aria-label="Toggle navigation menu" />
@@ -97,7 +101,7 @@ export function Navbar() {
 			<Drawer
 				opened={opened}
 				onClose={close}
-				title="Menu"
+				title={t("navbar.menu")}
 				padding="md"
 				position="left"
 				overlayProps={{ blur: 2 }}
@@ -114,7 +118,7 @@ export function Navbar() {
 						onClick={close}
 						fullWidth
 					>
-						Explore Tests
+						{t("navbar.explore")}
 					</Button>
 					{user && (
 						<>
@@ -126,7 +130,7 @@ export function Navbar() {
 								onClick={close}
 								fullWidth
 							>
-								Dashboard
+								{t("navbar.dashboard")}
 							</Button>
 							<Button
 								component={Link}
@@ -136,7 +140,7 @@ export function Navbar() {
 								onClick={close}
 								fullWidth
 							>
-								Create Test
+								{t("navbar.create")}
 							</Button>
 							<Button
 								component={Link}
@@ -146,7 +150,7 @@ export function Navbar() {
 								onClick={close}
 								fullWidth
 							>
-								Account
+								{t("navbar.account")}
 							</Button>
 							<Divider />
 						</>
@@ -155,11 +159,11 @@ export function Navbar() {
 						<Loader size="sm" />
 					) : user ? (
 						<Button variant="light" onClick={handleSignOut} leftSection={<IconLogout size={16} />} fullWidth>
-							Sign Out
+							{t("navbar.signOut")}
 						</Button>
 					) : (
 						<Button component={Link} href="/auth" leftSection={<IconLogin size={16} />} onClick={close} fullWidth>
-							Sign In
+							{t("navbar.signIn")}
 						</Button>
 					)}
 				</Stack>
