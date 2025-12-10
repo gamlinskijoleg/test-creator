@@ -23,7 +23,7 @@ import { IconAlertCircle, IconCheck } from "@tabler/icons-react"
 import type { User } from "@supabase/supabase-js"
 
 const signInSchema = z.object({
-	email: z.string().email("Invalid email address"),
+	email: z.string().min(1, "Email is required").email("Invalid email address"),
 	password: z.string().min(1, "Password is required"),
 })
 
@@ -32,10 +32,19 @@ const signUpSchema = signInSchema
 		name: z.string().min(1, "Name is required"),
 		confirmPassword: z.string().min(1, "Please confirm your password"),
 	})
-	.refine(data => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-		path: ["confirmPassword"],
-	})
+	.refine(
+		data => {
+			// Only check if both passwords are filled
+			if (!data.password || !data.confirmPassword) {
+				return true
+			}
+			return data.password === data.confirmPassword
+		},
+		{
+			message: "Passwords do not match",
+			path: ["confirmPassword"],
+		},
+	)
 
 type SignInFormData = z.infer<typeof signInSchema>
 type SignUpFormData = z.infer<typeof signUpSchema>
@@ -53,8 +62,9 @@ export default function AuthPage() {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors, isSubmitting, touchedFields },
 		reset,
+		clearErrors,
 	} = useForm<SignInFormData | SignUpFormData>({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -62,16 +72,19 @@ export default function AuthPage() {
 			password: "",
 			...(isSignUp && { name: "", confirmPassword: "" }),
 		},
-		mode: "onBlur",
+		mode: "onTouched",
+		reValidateMode: "onChange",
+		criteriaMode: "all",
 	})
 
 	useEffect(() => {
+		clearErrors()
 		reset({
 			email: "",
 			password: "",
 			...(isSignUp && { name: "", confirmPassword: "" }),
 		})
-	}, [isSignUp, reset])
+	}, [isSignUp, reset, clearErrors])
 
 	useEffect(() => {
 		getSession().then(({ user }) => {
@@ -150,7 +163,11 @@ export default function AuthPage() {
 								<TextInput
 									label="Name"
 									{...register("name")}
-									error={(errors as Record<string, { message?: string }>).name?.message}
+									error={
+										(touchedFields as Record<string, boolean>).name
+											? (errors as Record<string, { message?: string }>).name?.message
+											: undefined
+									}
 									required
 									placeholder="Your name"
 								/>
@@ -160,7 +177,7 @@ export default function AuthPage() {
 								label="Email"
 								type="email"
 								{...register("email")}
-								error={errors.email?.message}
+								error={touchedFields.email ? errors.email?.message : undefined}
 								required
 								placeholder="your@email.com"
 							/>
@@ -168,18 +185,20 @@ export default function AuthPage() {
 							<PasswordInput
 								label="Password"
 								{...register("password")}
-								error={errors.password?.message}
+								error={touchedFields.password ? errors.password?.message : undefined}
 								required
-								placeholder="••••••••"
 							/>
 
 							{isSignUp && (
 								<PasswordInput
 									label="Confirm Password"
 									{...register("confirmPassword")}
-									error={(errors as Record<string, { message?: string }>).confirmPassword?.message}
+									error={
+										(touchedFields as Record<string, boolean>).confirmPassword
+											? (errors as Record<string, { message?: string }>).confirmPassword?.message
+											: undefined
+									}
 									required
-									placeholder="••••••••"
 								/>
 							)}
 
@@ -210,6 +229,7 @@ export default function AuthPage() {
 								setIsSignUp(!isSignUp)
 								setError(null)
 								setMessage(null)
+								clearErrors()
 								reset()
 							}}
 						>
