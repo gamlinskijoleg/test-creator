@@ -69,12 +69,12 @@ export async function middleware(request: NextRequest) {
 	// Refresh session for authenticated routes
 	try {
 		const {
-			data: { session },
+			data: { user },
 			error,
-		} = await supabase.auth.getSession()
+		} = await supabase.auth.getUser()
 
-		// If session doesn't exist or is invalid, clear auth cookies
-		if (error || !session) {
+		// If user doesn't exist or is invalid, clear auth cookies
+		if (error || !user) {
 			const errorMessage = error?.message || ""
 			if (
 				errorMessage.includes("User from sub claim in JWT does not exist")

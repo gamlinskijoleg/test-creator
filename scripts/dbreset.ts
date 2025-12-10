@@ -54,5 +54,5 @@ async function deleteAllUsers() {
   console.log('Всі користувачі auth.users видалені!')
 }
 
-deleteAllUsers()
 resetDB()
+deleteAllUsers()

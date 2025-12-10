@@ -34,14 +34,14 @@ export async function createSupabaseServerClient() {
 	})
 }
 
-// Get user on server (using getSession() which doesn't throw when no session exists)
+// Get user on server (validated via supabase.auth.getUser())
 export async function getServerSession() {
 	try {
 		const supabase = await createSupabaseServerClient()
 		const {
-			data: { session },
+			data: { user },
 			error,
-		} = await supabase.auth.getSession()
+		} = await supabase.auth.getUser()
 
 		if (error) {
 			// Silently handle authentication errors - user is not authenticated
@@ -59,7 +59,7 @@ export async function getServerSession() {
 		}
 
 		// Return session-like object for backward compatibility
-		return session?.user ? { user: session.user } : null
+		return user ? { user } : null
 	} catch (error) {
 		// Handle any unexpected errors gracefully
 		// This includes AuthApiError and AuthSessionMissingError exceptions
