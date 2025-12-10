@@ -1,39 +1,20 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getSession, signOut } from "@/lib/actions/auth"
+import { signOut } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { Group, Button, Text, Loader, Container, Box } from "@mantine/core"
 import { IconDashboard, IconPlus, IconLogout, IconLogin, IconSearch, IconUser } from "@tabler/icons-react"
-import type { User } from "@supabase/supabase-js"
 
 export function Navbar() {
 	const router = useRouter()
-	const [user, setUser] = useState<User | null>(null)
-	const [loading, setLoading] = useState(true)
-
-	useEffect(() => {
-		const fetchUser = async () => {
-			const { user } = await getSession()
-			setUser(user)
-			setLoading(false)
-		}
-
-		fetchUser()
-
-		// Poll for session changes periodically
-		const interval = setInterval(() => {
-			fetchUser()
-		}, 5000)
-
-		return () => clearInterval(interval)
-	}, [])
+	const { user, loading, refresh } = useUser({ polling: true })
 
 	const handleSignOut = async () => {
 		const result = await signOut()
 		if (result.success) {
-			setUser(null)
+			await refresh()
 			router.push("/")
 		}
 	}

@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getTest, saveTestQuestions } from "@/lib/actions/tests"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { TestBuilder } from "@/components/TestBuilder"
 import { ShareButtons } from "@/components/ShareButtons"
 import { Container, Card, Title, Text, Stack, Group, Button, Loader, Alert } from "@mantine/core"
 import { IconArrowLeft, IconAlertCircle } from "@tabler/icons-react"
+import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 import type { Tables } from "@/types/supabase"
-import type { User } from "@supabase/supabase-js"
 
 type Question = Tables<"questions"> & {
 	answers?: Tables<"answers">[]
@@ -20,41 +20,40 @@ export default function EditTestPage() {
 	const router = useRouter()
 	const testId = params.id
 
-	const [user, setUser] = useState<User | null>(null)
+	const { user, loading: userLoading } = useUser()
 	const [test, setTest] = useState<Tables<"tests"> | null>(null)
 	const [questions, setQuestions] = useState<Question[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
 	useEffect(() => {
-		const fetchData = async () => {
-			const { user } = await getSession()
-			setUser(user)
-
+		if (!userLoading) {
 			if (!user) {
 				setLoading(false)
 				return
 			}
 
-			try {
-				const result = await getTest(testId)
+			const fetchData = async () => {
+				try {
+					const result = await getTest(testId)
 
-				if (!result.success || !result.test) {
-					throw new Error(result.error || "Failed to load test")
+					if (!result.success || !result.test) {
+						throw new Error(result.error || "Failed to load test")
+					}
+
+					setTest(result.test)
+					setQuestions(result.questions)
+				} catch (err) {
+					console.error("Error fetching test:", err)
+					setError(err instanceof Error ? err.message : "Failed to load test")
+				} finally {
+					setLoading(false)
 				}
-
-				setTest(result.test)
-				setQuestions(result.questions)
-			} catch (err) {
-				console.error("Error fetching test:", err)
-				setError(err instanceof Error ? err.message : "Failed to load test")
-			} finally {
-				setLoading(false)
 			}
-		}
 
-		fetchData()
-	}, [testId])
+			fetchData()
+		}
+	}, [testId, user, userLoading])
 
 	const handleSave = async (updatedQuestions: Question[]) => {
 		try {
@@ -74,7 +73,7 @@ export default function EditTestPage() {
 		}
 	}
 
-	if (loading) {
+	if (loading || userLoading) {
 		return (
 			<Container
 				size="xl"
@@ -104,16 +103,7 @@ export default function EditTestPage() {
 	}
 
 	if (!user) {
-		return (
-			<Container
-				size="sm"
-				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
-			>
-				<Card shadow="sm" padding="lg" radius="md" withBorder>
-					<Title order={2}>Please sign in</Title>
-				</Card>
-			</Container>
-		)
+		return <UnauthenticatedMessage />
 	}
 
 	return (

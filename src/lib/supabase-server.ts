@@ -34,23 +34,45 @@ export async function createSupabaseServerClient() {
 	})
 }
 
-// Get user on server (using getUser() for security)
+// Get user on server (using getSession() which doesn't throw when no session exists)
 export async function getServerSession() {
 	try {
 		const supabase = await createSupabaseServerClient()
 		const {
-			data: { user },
+			data: { session },
 			error,
-		} = await supabase.auth.getUser()
+		} = await supabase.auth.getSession()
 
 		if (error) {
-			console.error("Error getting user:", error)
+			// Silently handle authentication errors - user is not authenticated
+			const errorMessage = error.message || ""
+			if (
+				errorMessage.includes("User from sub claim in JWT does not exist")
+				|| errorMessage.includes("JWT")
+				|| errorMessage.includes("invalid")
+				|| errorMessage.includes("session")
+			) {
+				return null
+			}
+			console.error("Error getting session:", error)
 			return null
 		}
 
 		// Return session-like object for backward compatibility
-		return user ? { user } : null
+		return session?.user ? { user: session.user } : null
 	} catch (error) {
+		// Handle any unexpected errors gracefully
+		// This includes AuthApiError and AuthSessionMissingError exceptions
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		if (
+			errorMessage.includes("User from sub claim in JWT does not exist")
+			|| errorMessage.includes("JWT")
+			|| errorMessage.includes("AuthApiError")
+			|| errorMessage.includes("AuthSessionMissingError")
+			|| errorMessage.includes("session")
+		) {
+			return null
+		}
 		console.error("Error creating Supabase client:", error)
 		return null
 	}

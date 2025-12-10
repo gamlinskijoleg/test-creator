@@ -1,32 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { Container, Title, Text, Button, Group, Card, Stack, Grid, GridCol, Box } from "@mantine/core"
 import { IconFileText, IconChecklist, IconUsers, IconDashboard, IconPlus, IconLogin } from "@tabler/icons-react"
-import type { User } from "@supabase/supabase-js"
 
 export default function Home() {
 	const router = useRouter()
-	const [user, setUser] = useState<User | null>(null)
-
-	useEffect(() => {
-		const fetchUser = async () => {
-			const { user } = await getSession()
-			setUser(user)
-		}
-
-		fetchUser()
-
-		// Poll for session changes periodically
-		const interval = setInterval(() => {
-			fetchUser()
-		}, 5000)
-
-		return () => clearInterval(interval)
-	}, [])
+	const { user } = useUser({ polling: true })
 
 	return (
 		<Box>

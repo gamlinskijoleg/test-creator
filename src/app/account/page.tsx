@@ -6,7 +6,7 @@ import Link from "next/link"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { getUserProfile, upsertUserProfile } from "@/lib/actions/user"
 import { Container, Card, Title, TextInput, Button, Stack, Group, Loader, Select, Text, Alert } from "@mantine/core"
 import {
@@ -17,7 +17,7 @@ import {
 	IconAlertCircle,
 	IconCalendar,
 } from "@tabler/icons-react"
-import type { User } from "@supabase/supabase-js"
+import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 
 const pronounsOptions = [
 	{ value: "he/him", label: "He/Him" },
@@ -39,7 +39,7 @@ type AccountFormData = z.infer<typeof accountSchema>
 
 export default function AccountPage() {
 	const router = useRouter()
-	const [user, setUser] = useState<User | null>(null)
+	const { user, loading: userLoading } = useUser()
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
@@ -62,33 +62,31 @@ export default function AccountPage() {
 	})
 
 	useEffect(() => {
-		const fetchUserAndProfile = async () => {
-			const { user } = await getSession()
-			setUser(user)
+		if (!userLoading) {
 			if (!user) {
-				router.push("/auth")
 				setLoading(false)
 				return
 			}
 
 			// Load user profile
-			const profileResult = await getUserProfile(user.id)
-			if (profileResult.success && profileResult.profile) {
-				const profile = profileResult.profile
-				reset({
-					name: profile.name || "",
-					surname: profile.surname || "",
-					birthdate: profile.birthdate ? new Date(profile.birthdate) : null,
-					pronouns: profile.pronouns || "",
-					city: profile.city || "",
-				})
+			const fetchProfile = async () => {
+				const profileResult = await getUserProfile(user.id)
+				if (profileResult.success && profileResult.profile) {
+					const profile = profileResult.profile
+					reset({
+						name: profile.name || "",
+						surname: profile.surname || "",
+						birthdate: profile.birthdate ? new Date(profile.birthdate) : null,
+						pronouns: profile.pronouns || "",
+						city: profile.city || "",
+					})
+				}
+				setLoading(false)
 			}
 
-			setLoading(false)
+			fetchProfile()
 		}
-
-		fetchUserAndProfile()
-	}, [router, reset])
+	}, [user, userLoading, reset])
 
 	const onSubmit = async (data: AccountFormData) => {
 		if (!user) return
@@ -116,7 +114,7 @@ export default function AccountPage() {
 		}
 	}
 
-	if (loading) {
+	if (loading || userLoading) {
 		return (
 			<Container
 				size="md"
@@ -128,7 +126,7 @@ export default function AccountPage() {
 	}
 
 	if (!user) {
-		return null
+		return <UnauthenticatedMessage />
 	}
 
 	return (

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { signIn, signUp, getSession } from "@/lib/actions/auth"
+import { signIn, signUp } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import {
 	Card,
 	Title,
@@ -20,7 +21,6 @@ import {
 	Anchor,
 } from "@mantine/core"
 import { IconAlertCircle, IconCheck } from "@tabler/icons-react"
-import type { User } from "@supabase/supabase-js"
 
 const signInSchema = z.object({
 	email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -37,9 +37,8 @@ type SignUpFormData = z.infer<typeof signUpSchema>
 
 export default function AuthPage() {
 	const router = useRouter()
+	const { user, loading } = useUser()
 	const [isSignUp, setIsSignUp] = useState(false)
-	const [user, setUser] = useState<User | null>(null)
-	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [message, setMessage] = useState<string | null>(null)
 
@@ -87,14 +86,10 @@ export default function AuthPage() {
 	}, [isSignUp, reset, clearErrors])
 
 	useEffect(() => {
-		getSession().then(({ user }) => {
-			setUser(user)
-			setLoading(false)
-			if (user) {
-				router.push("/dashboard")
-			}
-		})
-	}, [router])
+		if (user) {
+			router.push("/dashboard")
+		}
+	}, [user, router])
 
 	const onSubmit = async (data: SignInFormData | SignUpFormData) => {
 		setError(null)

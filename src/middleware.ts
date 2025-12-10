@@ -67,7 +67,44 @@ export async function middleware(request: NextRequest) {
 	}
 
 	// Refresh session for authenticated routes
-	await supabase.auth.getUser()
+	try {
+		const {
+			data: { session },
+			error,
+		} = await supabase.auth.getSession()
+
+		// If session doesn't exist or is invalid, clear auth cookies
+		if (error || !session) {
+			const errorMessage = error?.message || ""
+			if (
+				errorMessage.includes("User from sub claim in JWT does not exist") ||
+				errorMessage.includes("JWT") ||
+				errorMessage.includes("invalid") ||
+				errorMessage.includes("session")
+			) {
+				// Clear auth-related cookies
+				const supabaseDomain = supabaseUrl?.split("//")[1]?.split(".")[0]
+				if (supabaseDomain) {
+					response.cookies.delete(`sb-${supabaseDomain}-auth-token`)
+				}
+			}
+		}
+	} catch (error) {
+		// Silently handle authentication errors in middleware
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		if (
+			errorMessage.includes("User from sub claim in JWT does not exist") ||
+			errorMessage.includes("AuthApiError") ||
+			errorMessage.includes("AuthSessionMissingError") ||
+			errorMessage.includes("session")
+		) {
+			// Clear potentially invalid cookies
+			const supabaseDomain = supabaseUrl?.split("//")[1]?.split(".")[0]
+			if (supabaseDomain) {
+				response.cookies.delete(`sb-${supabaseDomain}-auth-token`)
+			}
+		}
+	}
 
 	return response
 }

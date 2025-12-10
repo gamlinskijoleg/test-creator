@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { getTest, submitTest } from "@/lib/actions/tests"
 import { TestRunner } from "@/components/TestRunner"
 import { Container, Card, Title, Stack, Loader, Alert } from "@mantine/core"
@@ -18,6 +18,7 @@ type Test = Tables<"tests">
 export default function TakeTestPage() {
 	const params = useParams<{ id: string }>()
 	const testId = params.id
+	const { user } = useUser()
 
 	const [test, setTest] = useState<Test | null>(null)
 	const [questions, setQuestions] = useState<Question[]>([])
@@ -58,7 +59,6 @@ export default function TakeTestPage() {
 	}, [testId])
 
 	const handleSubmit = async (answers: Record<string, string>) => {
-		const { user } = await getSession()
 		const userId = user?.id || null
 
 		const result = await submitTest(testId, answers, userId)

@@ -4,10 +4,34 @@ import { createSupabaseServerClient, getServerSession } from "../supabase-server
 
 // Get current session
 export async function getSession() {
-	const session = await getServerSession()
-	return {
-		user: session?.user ?? null,
-		session: session ? { user: session.user } : null,
+	try {
+		const session = await getServerSession()
+		return {
+			user: session?.user ?? null,
+			session: session ? { user: session.user } : null,
+		}
+	} catch (error) {
+		// Handle any authentication errors gracefully
+		// Return null user instead of throwing
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		if (
+			errorMessage.includes("User from sub claim in JWT does not exist") ||
+			errorMessage.includes("AuthApiError") ||
+			errorMessage.includes("AuthSessionMissingError") ||
+			errorMessage.includes("session") ||
+			errorMessage.includes("JWT")
+		) {
+			return {
+				user: null,
+				session: null,
+			}
+		}
+		// For unexpected errors, log and return null
+		console.error("Unexpected error in getSession:", error)
+		return {
+			user: null,
+			session: null,
+		}
 	}
 }
 

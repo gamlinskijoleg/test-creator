@@ -2,13 +2,12 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { getAllTestsPaginatedClient } from "@/lib/client/user"
 import { Container, Title, Card, Text, Grid, GridCol, Stack, Group, Loader, Button, Box } from "@mantine/core"
 import { IconPlayerPlay, IconUser } from "@tabler/icons-react"
 import { ShareButtons } from "@/components/ShareButtons"
 import type { Tables } from "@/types/supabase"
-import type { User } from "@supabase/supabase-js"
 
 type Test = Tables<"tests"> & {
 	authorProfile: {
@@ -18,7 +17,7 @@ type Test = Tables<"tests"> & {
 }
 
 export default function TestsPage() {
-	const [user, setUser] = useState<User | null>(null)
+	const { user } = useUser()
 	const [tests, setTests] = useState<Test[]>([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -57,14 +56,8 @@ export default function TestsPage() {
 	}, [])
 
 	useEffect(() => {
-		const fetchUserAndTests = async () => {
-			const { user } = await getSession()
-			setUser(user)
-			await fetchTests(1, false)
-			setLoading(false)
-		}
-
-		fetchUserAndTests()
+		fetchTests(1, false)
+		setLoading(false)
 	}, [fetchTests])
 
 	// Observer for infinite scroll

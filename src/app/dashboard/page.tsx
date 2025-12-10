@@ -2,18 +2,18 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
-import { getSession } from "@/lib/actions/auth"
+import { useUser } from "@/lib/hooks/useUser"
 import { getUserTestsPaginated } from "@/lib/actions/user"
 import { Container, Title, Button, Card, Text, Grid, GridCol, Stack, Group, Loader } from "@mantine/core"
 import { IconPlus, IconEdit, IconPlayerPlay } from "@tabler/icons-react"
 import { ShareButtons } from "@/components/ShareButtons"
+import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 import type { Tables } from "@/types/supabase"
-import type { User } from "@supabase/supabase-js"
 
 type Test = Tables<"tests">
 
 export default function DashboardPage() {
-	const [user, setUser] = useState<User | null>(null)
+	const { user, loading: userLoading } = useUser()
 	const [tests, setTests] = useState<Test[]>([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -50,28 +50,13 @@ export default function DashboardPage() {
 	}, [])
 
 	useEffect(() => {
-		let mounted = true
-
-		const fetchUserAndTests = async () => {
-			const { user } = await getSession()
-			if (!mounted) return
-
-			setUser(user)
-
-			if (user) {
-				await fetchTests(user.id, 1, false)
-			}
-			if (mounted) {
-				setLoading(false)
-			}
+		if (!userLoading && user) {
+			fetchTests(user.id, 1, false)
+			setLoading(false)
+		} else if (!userLoading) {
+			setLoading(false)
 		}
-
-		fetchUserAndTests()
-
-		return () => {
-			mounted = false
-		}
-	}, [])
+	}, [user, userLoading, fetchTests])
 
 	useEffect(() => {
 		if (!user || !hasMore || loadingMore || loading) return
@@ -101,7 +86,7 @@ export default function DashboardPage() {
 		}
 	}, [hasMore, loadingMore, loading, user, fetchTests])
 
-	if (loading) {
+	if (loading || userLoading) {
 		return (
 			<Container
 				size="xl"
@@ -113,21 +98,7 @@ export default function DashboardPage() {
 	}
 
 	if (!user) {
-		return (
-			<Container
-				size="sm"
-				style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
-			>
-				<Card shadow="sm" padding="lg" radius="md" withBorder>
-					<Stack gap="md" align="center">
-						<Title order={2}>Please sign in</Title>
-						<Button component={Link} href="/auth">
-							Sign In
-						</Button>
-					</Stack>
-				</Card>
-			</Container>
-		)
+		return <UnauthenticatedMessage />
 	}
 
 	return (
