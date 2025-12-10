@@ -82,9 +82,6 @@ export function Navbar() {
 									>
 										{t("navbar.account")}
 									</Button>
-									<Button variant="light" onClick={handleSignOut} leftSection={<IconLogout size={16} />} size="sm">
-										{t("navbar.signOut")}
-									</Button>
 								</>
 							) : (
 								<Button component={Link} href="/auth" leftSection={<IconLogin size={16} />} size="sm">

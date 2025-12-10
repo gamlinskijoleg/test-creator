@@ -9,6 +9,7 @@ import { z } from "zod"
 import { useTranslation } from "react-i18next"
 import { useUser } from "@/lib/hooks/useUser"
 import { getUserProfile, upsertUserProfile } from "@/lib/actions/user"
+import { signOut } from "@/lib/actions/auth"
 import { Container, Card, Title, TextInput, Button, Stack, Group, Loader, Select, Text, Alert } from "@mantine/core"
 import {
 	IconUser,
@@ -18,6 +19,7 @@ import {
 	IconAlertCircle,
 	IconCalendar,
 	IconLanguage,
+	IconLogout,
 } from "@tabler/icons-react"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from "@/i18n/config"
@@ -40,6 +42,7 @@ export default function AccountPage() {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
+	const [signingOut, setSigningOut] = useState(false)
 
 	const {
 		register,
@@ -137,6 +140,23 @@ export default function AccountPage() {
 		}
 	}
 
+	const handleSignOut = async () => {
+		try {
+			setSigningOut(true)
+			const result = await signOut()
+			if (result.success) {
+				router.push("/")
+			} else if (result.error) {
+				setError(result.error)
+			}
+		} catch (err) {
+			console.error("Error signing out:", err)
+			setError(err instanceof Error ? err.message : t("account.failed"))
+		} finally {
+			setSigningOut(false)
+		}
+	}
+
 	if (loading || userLoading) {
 		return (
 			<Container
@@ -158,9 +178,25 @@ export default function AccountPage() {
 				<Stack gap="lg">
 					<Group justify="space-between">
 						<Title order={1}>{t("account.title")}</Title>
-						<Button component={Link} href="/dashboard" variant="subtle" leftSection={<IconArrowLeft size={16} />}>
-							{t("account.back")}
-						</Button>
+						<Group gap="xs">
+							<Button
+								component={Link}
+								href="/dashboard"
+								variant="subtle"
+								leftSection={<IconArrowLeft size={16} />}
+							>
+								{t("account.back")}
+							</Button>
+							<Button
+								variant="outline"
+								color="red"
+								onClick={handleSignOut}
+								leftSection={<IconLogout size={16} />}
+								loading={signingOut}
+							>
+								{t("navbar.signOut")}
+							</Button>
+						</Group>
 					</Group>
 
 					<Text c="dimmed" size="sm">
