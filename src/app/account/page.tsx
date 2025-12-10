@@ -17,8 +17,10 @@ import {
 	IconCheck,
 	IconAlertCircle,
 	IconCalendar,
+	IconLanguage,
 } from "@tabler/icons-react"
 import { UnauthenticatedMessage } from "@/components/UnauthenticatedMessage"
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from "@/i18n/config"
 
 const accountSchema = z.object({
 	name: z.string().optional(),
@@ -26,6 +28,7 @@ const accountSchema = z.object({
 	birthdate: z.date().nullable().optional(),
 	pronouns: z.string().optional(),
 	city: z.string().optional(),
+	language: z.enum(SUPPORTED_LOCALES).optional(),
 })
 
 type AccountFormData = z.infer<typeof accountSchema>
@@ -33,7 +36,7 @@ type AccountFormData = z.infer<typeof accountSchema>
 export default function AccountPage() {
 	const router = useRouter()
 	const { user, loading: userLoading } = useUser()
-	const { t } = useTranslation()
+	const { t, i18n } = useTranslation()
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
@@ -52,6 +55,7 @@ export default function AccountPage() {
 			birthdate: null,
 			pronouns: "",
 			city: "",
+			language: DEFAULT_LOCALE,
 		},
 	})
 
@@ -63,6 +67,15 @@ export default function AccountPage() {
 			{ value: "other", label: t("account.options.other") },
 			{ value: "prefer-not-to-say", label: t("account.options.none") },
 		],
+		[t],
+	)
+
+	const languageOptions = useMemo(
+		() =>
+			SUPPORTED_LOCALES.map(locale => ({
+				value: locale,
+				label: `${locale === "en" ? "🇺🇸" : "🇺🇦"} ${t(`language.${locale}`)}`,
+			})),
 		[t],
 	)
 
@@ -84,6 +97,7 @@ export default function AccountPage() {
 						birthdate: profile.birthdate ? new Date(profile.birthdate) : null,
 						pronouns: profile.pronouns || "",
 						city: profile.city || "",
+						language: (profile.language as Locale | null) || DEFAULT_LOCALE,
 					})
 				}
 				setLoading(false)
@@ -106,12 +120,16 @@ export default function AccountPage() {
 				birthdate: data.birthdate ? data.birthdate.toISOString().split("T")[0] : null,
 				pronouns: data.pronouns || null,
 				city: data.city || null,
+				language: data.language || DEFAULT_LOCALE,
 			})
 
 			if (!result.success) {
 				setError(result.error || t("account.failed"))
 			} else {
 				setSuccess(t("account.successText"))
+				const nextLocale = data.language || DEFAULT_LOCALE
+				document.cookie = `locale=${nextLocale}; path=/; max-age=31536000`
+				await i18n.changeLanguage(nextLocale)
 			}
 		} catch (err) {
 			console.error("Error saving profile:", err)
@@ -217,6 +235,23 @@ export default function AccountPage() {
 										clearable
 										searchable
 										error={errors.pronouns?.message}
+									/>
+								)}
+							/>
+
+							<Controller
+								name="language"
+								control={control}
+								render={({ field }) => (
+									<Select
+										label={t("language.label")}
+										value={field.value || ""}
+										onChange={field.onChange}
+										data={languageOptions}
+										leftSection={<IconLanguage size={16} />}
+										allowDeselect={false}
+										aria-label={t("language.ariaLabel")}
+										error={errors.language?.message}
 									/>
 								)}
 							/>

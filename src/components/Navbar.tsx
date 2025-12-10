@@ -8,7 +8,6 @@ import { Group, Button, Text, Loader, Container, Box, Burger, Drawer, Stack, Div
 import { useDisclosure } from "@mantine/hooks"
 import { useTranslation } from "react-i18next"
 import { IconDashboard, IconPlus, IconLogout, IconLogin, IconSearch, IconUser } from "@tabler/icons-react"
-import { LanguageSwitcher } from "./LanguageSwitcher"
 
 export function Navbar() {
 	const router = useRouter()
@@ -69,7 +68,6 @@ export function Navbar() {
 							</Group>
 						</Group>
 						<Group gap="md" wrap="nowrap" align="center">
-							<LanguageSwitcher />
 							{loading ? (
 								<Loader size="sm" />
 							) : user ? (

@@ -86,6 +86,7 @@ export type Database = {
 					city: string | null
 					created_at: string | null
 					id: string
+					language: string | null
 					name: string | null
 					pronouns: string | null
 					surname: string | null
@@ -97,6 +98,7 @@ export type Database = {
 					city?: string | null
 					created_at?: string | null
 					id?: string
+					language?: string | null
 					name?: string | null
 					pronouns?: string | null
 					surname?: string | null
@@ -108,6 +110,7 @@ export type Database = {
 					city?: string | null
 					created_at?: string | null
 					id?: string
+					language?: string | null
 					name?: string | null
 					pronouns?: string | null
 					surname?: string | null

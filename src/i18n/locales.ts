@@ -9,6 +9,4 @@ export const resources = {
 	uk: { common: ukCommon },
 } satisfies Resource
 
-export const getResourcesFor = (locale: Locale): Resource => ({
-	[locale]: resources[locale],
-})
+export const getResourcesFor = (_locale: Locale): Resource => resources
